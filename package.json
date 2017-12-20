@@ -1,0 +1,22 @@
+{
+  "name": "vue-annotator",
+  "version": "1.0.0",
+  "description": "Vue Component for drawing annotation (box, etc)",
+  "main": "dist/vue-annotator.js",
+  "author": "Fahmi Akbar Wildana",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "build": "poi build src/Annotator.vue --component vue-annotator"
+  },
+  "devDependencies": {
+    "poi": "^9.3.10"
+  },
+  "dependencies": {
+    "interactjs": "^1.3.2",
+    "svg.draggable.js": "^2.2.1",
+    "svg.resize.js": "^1.4.1",
+    "svg.select.js": "^2.1.2",
+    "svgjs": "^2.6.2"
+  }
+}
