@@ -13,12 +13,21 @@
 
 <script>
 import interact from 'interactjs'
-// import SVG from 'svgjs'
+import SVG from 'svg.js'
 
 export default {
   props: {
     width: Number,
     height: Number,
+    minAnonSize: {
+      type: Array,
+      default: function () {
+        return [10, 10]
+      },
+      validator: function (value) {
+        return value.length == 2 && value.every(v => typeof (v) === 'number')
+      }
+    },
   },
 
   data () {
@@ -36,72 +45,80 @@ export default {
     for (const i in this.$slots.annotation) {
       const el = this.$slots.annotation[i].elm
       if (el) {
-        // const elSvg = SVG.adopt(el)
-        interact(el).draggable({
-          // enable inertial throwing
-          inertia: true,
-          // keep the element within the area of it's parent
-          restrict: {
-            restriction: 'svg',
-            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-          },
-          // enable autoScroll
-          autoScroll: true,
+        interact(el)
+          .draggable({
+            inertia: true,
+            // keep the element within the area of it's parent
+            restrict: {
+              restriction: 'svg',
+              elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+            },
+            autoScroll: true,
 
-          // call this function on every dragmove event
-          onmove (event) {
-            var target = event.target,
-              // keep the dragged position in the data-x/data-y attributes
-              x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-              y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+            // call this function on every dragmove event
+            onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
+          })
+          .resizable({
+            // resize from all edges and corners
+            edges: { left: true, right: true, bottom: true, top: true },
 
-            // translate the element
-            target.style.webkitTransform =
-              target.style.transform =
-              'translate(' + x + 'px, ' + y + 'px)';
+            // keep the edges inside the parent
+            restrictEdges: {
+              outer: 'svg',
+            },
 
-            // update the posiion attributes
-            target.setAttribute('data-x', x);
-            target.setAttribute('data-y', y);
-          }
-        }).resizable({
-          // resize from all edges and corners
-          edges: { left: true, right: true, bottom: true, top: true },
+            // minimum size
+            restrictSize: {
+              min: { width: this.minAnonSize[0], height: this.minAnonSize[1] },
+            },
+            inertia: true,
 
-          // keep the edges inside the parent
-          restrictEdges: {
-            outer: 'svg',
-          },
+            // call this function on every resizemove event
+            onmove: (event) => {
+              const target = SVG.adopt(event.target)
 
-          // minimum size
-          restrictSize: {
-            min: { width: 10, height: 10 },
-          },
+              let x = target.x() + event.deltaRect.left
+              let y = target.y() + event.deltaRect.top
+              switch (target.type) {
+                case 'ellipse':
+                  target.move(x + event.deltaRect.width / 2, y + event.deltaRect.height / 2)
+                  target.size(event.rect.width, event.rect.height)
+                  break;
+                case 'circle':
+                  const antiPhytagoras = (x, y) => x != 0 && y != 0 && Math.sign(x) != Math.sign(y) ? 0 : Math.sign(x + y) * Math.hypot(event.deltaRect.width, event.deltaRect.height)
+                  const delta = antiPhytagoras(event.deltaRect.width, event.deltaRect.height)
+                  const d = s => delta != 0 ? (s / 2) : 0
+                  const threshold = this.minAnonSize.reduce((sum, val) => sum + val) / 2 // because deltaRect will keep going when resizing in diagonal
 
-          inertia: true
+                  if (event.rect.width > threshold && event.rect.height > threshold) {
+                    x += d(event.deltaRect.width)
+                    y += d(event.deltaRect.height)
+                  } else {
+                    x = target.x()
+                    y = target.y()
+                  }
 
-        }).on('resizemove', function (event) {
-          var target = event.target,
-            x = (parseFloat(target.getAttribute('data-x')) || 0),
-            y = (parseFloat(target.getAttribute('data-y')) || 0);
+                  let diameter = target.attr('r') * 2 + delta
+                  diameter = Math.max(diameter, threshold)
 
-          // update the element's style
-          target.style.width = event.rect.width + 'px';
-          target.style.height = event.rect.height + 'px';
+                  target.move(x, y)
+                  target.size(diameter)
 
-          // translate when resizing from top or left edges
-          x += event.deltaRect.left;
-          y += event.deltaRect.top;
+                  break;
+                default:
+                  target.move(x, y)
+                  target.size(event.rect.width, event.rect.height)
+                  break;
+              }
+            }
+          })
 
-          target.style.webkitTransform = target.style.transform =
-            'translate(' + x + 'px,' + y + 'px)';
-
-          target.setAttribute('data-x', x);
-          target.setAttribute('data-y', y);
-          target.textContent = Math.round(event.rect.width) + '\u00D7' + Math.round(event.rect.height);
-        })
-
-        // TODO: https://codepen.io/drsensor/pen/Vyjaao
+        /** Resize circle on rotation mode
+        @example
+        let r = target.attr('r') + (event.deltaRect.width || event.deltaRect.height)
+        target.radius(r)
+        */
+        // TODO(rotate): https://codepen.io/drsensor/pen/Vyjaao
       }
     }
   }
