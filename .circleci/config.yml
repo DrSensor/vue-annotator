@@ -3,11 +3,11 @@
 # Check https://circleci.com/docs/2.0/language-javascript/ for more details
 #
 version: 2
-docker:
-  - image: circleci/node:latest
 
 jobs:
   build:
+    docker:
+      - image: circleci/node:latest
     working_directory: ~/repo
     steps:
       - checkout
@@ -26,6 +26,8 @@ jobs:
       - run: yarn storybook:build
 
   publish:
+    docker:
+      - image: circleci/node:latest
     working_directory: ~/repo
     steps:
       - checkout
@@ -34,6 +36,8 @@ jobs:
       - run: npm publish
   
   deploy:
+    docker:
+      - image: circleci/node:latest
     working_directory: ~/repo
     steps:
       - checkout
