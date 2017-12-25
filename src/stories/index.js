@@ -5,6 +5,7 @@ import { action } from '@storybook/addon-actions'
 import { withNotes } from '@storybook/addon-notes'
 import { withDocs } from 'storybook-readme'
 import { withInfo } from '@storybook/addon-info'
+import { storyOrder } from './config.js'
 
 import {
   text,
@@ -17,17 +18,23 @@ import {
   button
 } from '@storybook/addon-knobs'
 
-// import Component from './Welcome.vue'
+// import Component from './BasicShape/Circle.vue'
 // storiesOf('storyName', module).add('componentName', () => {
 //   return {
-//     template: '<story></story>',
+//     render () {
+//       return <story
+//         minSize={[100, 100]}
+//         grid={[0, 0]}
+//         width={600}
+//         height={600}
+//         inertia
+//       />
+//     },
 //     components: {
-//       'story': () => import('./Welcome.vue')
+//       'story': Component
 //     }
 //   }
 // })
-
-import { storyOrder } from './config.js'
 
 require.context('.', true, /\.vue$/).keys()
   .sort((a, b) => {

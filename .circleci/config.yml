@@ -34,12 +34,10 @@ jobs:
       - run: npm publish
   
   deploy:
-  working_directory: ~/repo
-  steps:
-    - checkout
-    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-    - run: yarn build
-    - run: npm publish
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run: yarn deploy-storybook
 
 workflows:
   version: 2
@@ -49,6 +47,9 @@ workflows:
           filters:
             tags:
               only: /.*/
+      - deploy:
+          requires:
+            - build
       - publish:
           filters:
             tags:

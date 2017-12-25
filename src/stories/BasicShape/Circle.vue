@@ -6,7 +6,9 @@
   </div>
 </template>
 <script>
-import Annotator from '../../Annotator'
+/** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
+@code import Annotator from '../../Annotator'
+*/
 
 export default {
   props: [
@@ -17,7 +19,7 @@ export default {
     'inertia'
   ],
   components: {
-    annotations: Annotator
+    annotations: () => import('../../Annotator')
   }
 }
 </script>
