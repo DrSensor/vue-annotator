@@ -45,12 +45,14 @@ export default {
 
   mounted () {
     const master = SVG(this.$refs.svg)
-    const media = this.$slots.default.filter(el => ['img', 'video', 'audio', 'picture'].includes(el.tag))
-    const interval = setInterval(() => {
-      let loadComplete = media.every(el => el.elm.complete)
-      this.$forceUpdate()
-      if (loadComplete) clearInterval(interval)
-    }, 43.48)
+    if (this.$slots.default) {
+      const media = this.$slots.default.filter(el => ['img', 'video', 'audio', 'picture'].includes(el.tag))
+      const interval = setInterval(() => {
+        let loadComplete = media.every(el => el.elm.complete)
+        this.$forceUpdate()
+        if (loadComplete) clearInterval(interval)
+      }, 43.48)
+    } else this.$forceUpdate()
 
     let gridTarget = this.grid ? interact.createSnapGrid({
       x: this.grid[0],
