@@ -41,6 +41,7 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
+      - run: yarn
       - run: yarn deploy-storybook
 
 workflows:
