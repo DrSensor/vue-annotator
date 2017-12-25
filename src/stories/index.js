@@ -42,38 +42,69 @@ require.context('.', true, /\.vue$/).keys()
       let componentName = hierarchy.length > 2 ? basename.replace('.vue', '') : 'Introduction'
       let storyName = hierarchy.length > 2 ? hierarchy[hierarchy.length - 2] : basename.replace('.vue', '')
 
+      const Stories = storiesOf(storyName, module)
       const Component = require(`${filename}`).default
 
       const story = () => {
-        // const name = text('Name', 'Jane')
-        // const stock = number('Stock', 20, {
-        //   range: true,
-        //   min: 0,
-        //   max: 30,
-        //   step: 5,
-        // })
-        // const fruits = {
-        //   apples: 'Apple',
-        //   bananas: 'Banana',
-        //   cherries: 'Cherry',
-        // }
-        // const fruit = select('Fruit', fruits, 'apple')
-        // const price = number('Price', 2.25)
+        /** WIP: @since https://github.com/storybooks/storybook/issues/2560 so wait to resolve
+        @code
+         const minWidth = number('minWidth', {
+           range: true,
+           min: 5,
+           max: 100,
+           step: 1
+         })
+         const minHeight = number('minHeight', {
+           range: true,
+           min: 5,
+           max: 100,
+           step: 1
+         })
+         const gridWidth = number('gridWidth', {
+           range: true,
+           min: 0,
+           max: 100,
+           step: 1
+         })
+         const gridHeight = number('gridHeight', {
+           range: true,
+           min: 0,
+           max: 100,
+           step: 1
+         })
+         const width = number('width', {
+           range: true,
+           min: 100,
+           max: 1280,
+           step: 1
+         })
+         const height = number('height', {
+           range: true,
+           min: 100,
+           max: 720,
+           step: 1
+         })
+        @endcode
+        */
 
-        // const colour = color('Border', 'deeppink')
-        // const today = date('Today', new Date('Jan 20 2017'))
-        // const items = array('Items', ['Laptop', 'Book', 'Whiskey'])
-        // const nice = boolean('Nice', true)
-
-        // const stockMessage = stock
-        //   ? `I have a stock of ${stock} ${fruit}, costing &dollar${price} each.`
-        //   : `I'm out of ${fruit}${nice ? ', Sorry!' : '.'}`
-        // const salutation = nice ? 'Nice to meet you!' : 'Leave me alone!'
-
-        // button('Arbitrary action', action('You clicked it!'))
+        const minWidth = 100
+        const minHeight = 100
+        const gridWidth = 0
+        const gridHeight = 0
+        const width = 600
+        const height = 600
+        const inertia = true
 
         return {
-          template: '<story></story>',
+          render () {
+            return <story
+              minSize={[minWidth, minHeight]}
+              grid={[gridWidth, gridHeight]}
+              width={width}
+              height={height}
+              inertia={inertia}
+            />
+          },
           components: {
             'story': Component
           }
@@ -84,7 +115,7 @@ require.context('.', true, /\.vue$/).keys()
       const storyWithNotes = withNotes(Component.__notes || '')(story)
       // const storyWithInfo = withInfo(Component.__info || '')(story) // BUG: not support Vue Component
       // const storyWithDocs = withDocs(Component.__docs || '', storyWithNotes) // WIP: https://github.com/tuchk4/storybook-readme/issues/37
-      storiesOf(storyName, module).add(componentName, storyWithNotes)
+      Stories.add(componentName, storyWithNotes)
     }
   })
 

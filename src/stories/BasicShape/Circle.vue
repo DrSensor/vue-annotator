@@ -1,6 +1,6 @@
 <template>
   <div id="annotation">
-    <annotations :minSize="50" :width="600" :height="600">
+    <annotations :minSize="minSize" :width="width" :height="height" :grid="grid" :inertia="inertia">
       <circle class="style" slot="annotation" cx="150" cy="150" r="100" />
     </annotations>
   </div>
@@ -9,6 +9,13 @@
 import Annotator from '../../Annotator'
 
 export default {
+  props: [
+    'minSize',
+    'grid',
+    'width',
+    'height',
+    'inertia'
+  ],
   components: {
     annotations: Annotator
   }
