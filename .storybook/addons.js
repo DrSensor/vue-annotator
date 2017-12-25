@@ -1,4 +1,3 @@
-window.STORYBOOK_ENV='vue'
 import '@storybook/addon-options/register'
 
 import '@storybook/addon-notes/register'

@@ -23,7 +23,7 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: yarn poi build --generate-stats
+      - run: yarn storybook:build
 
   publish:
     working_directory: ~/repo
@@ -32,6 +32,14 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: yarn build
       - run: npm publish
+  
+  deploy:
+  working_directory: ~/repo
+  steps:
+    - checkout
+    - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+    - run: yarn build
+    - run: npm publish
 
 workflows:
   version: 2
