@@ -1,4 +1,5 @@
 # vue-annotator
+[![CircleCI](https://circleci.com/gh/DrSensor/vue-annotator.svg?style=svg)](https://circleci.com/gh/DrSensor/vue-annotator)
 
 Create annotation using SVG and HTML element.
 

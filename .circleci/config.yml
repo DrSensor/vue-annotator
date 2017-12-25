@@ -4,11 +4,14 @@
 #
 version: 2
 
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: circleci/node:latest
+
 jobs:
   build:
-    docker:
-      - image: circleci/node:latest
-    working_directory: ~/repo
+    <<: *defaults
     steps:
       - checkout
       # Download and cache dependencies
@@ -24,11 +27,15 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run: yarn storybook:build
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - package.json
+            - .storybook/dist
+            - node_modules
 
   publish:
-    docker:
-      - image: circleci/node:latest
-    working_directory: ~/repo
+    <<: *defaults
     steps:
       - checkout
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
@@ -36,13 +43,11 @@ jobs:
       - run: npm publish
   
   deploy:
-    docker:
-      - image: circleci/node:latest
-    working_directory: ~/repo
+    <<: *defaults
     steps:
-      - checkout
-      - run: yarn
-      - run: yarn deploy-storybook
+      - attach_workspace:
+          at: ~/repo
+      - run: yarn deploy-storybook -- --domain $CIRCLE_PROJECT_REPONAME.surge.sh
 
 workflows:
   version: 2

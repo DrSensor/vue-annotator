@@ -9,7 +9,7 @@
   "scripts": {
     "storybook": "poi --config .storybook/poi.config.js --storybook -o",
     "storybook:build": "poi build --config .storybook/poi.config.js --storybook",
-    "deploy-storybook": "storybook-to-ghpages",
+    "deploy-storybook": "surge .storybook/dist",
     "build": "poi build src/Annotator.vue --component vue-annotator"
   },
   "devDependencies": {
@@ -20,22 +20,16 @@
     "@storybook/addon-knobs": "^3.2.19",
     "@storybook/addon-notes": "^3.2.19",
     "@storybook/addon-options": "^3.2.19",
-    "@storybook/storybook-deployer": "^2.2.0",
     "@storybook/vue": "^3.2.19",
-    "html-loader": "^0.5.1",
-    "markdown-loader": "^2.0.1",
     "marked": "^0.3.9",
     "poi": "^9.4.3",
-    "poi-preset-babel-minify": "^1.0.3",
     "poi-preset-storybook": "^0.1.3",
     "raw-loader": "^0.5.1",
-    "storybook-readme": "^3.1.1"
+    "storybook-readme": "^3.1.1",
+    "surge": "^0.19.0"
   },
   "dependencies": {
     "interactjs": "^1.3.2",
     "svg.js": "^2.6.3"
-  },
-  "storybook-deployer": {
-    "commitMessage": "Deploy Storybook [skip ci]"
   }
 }

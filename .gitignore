@@ -1,3 +1,4 @@
 dist/
 *.lock
 out*
+.out*
