@@ -9,6 +9,13 @@ defaults: &defaults
   docker:
     - image: circleci/node:latest
 
+env: &env
+  run:
+    name: set environment variables
+    command: |
+      echo export\ MERGE_PR_NUMBER=$(git log --oneline --merges --pretty=format:"%s" --grep="Merge pull request" -n 1 ${CIRCLE_SHA1} | sed 's/from.*//' | sed -e 's/.*[^0-9]\([0-9]\+\)[^0-9]*$/\1/') >> $BASH_ENV
+      echo export\ COMMIT_MSG=\"$(git log --oneline --pretty=format:"%s" -n 1 $CIRCLE_SHA1)\" >> $BASH_ENV
+
 jobs:
   build:
     <<: *defaults
@@ -20,34 +27,55 @@ jobs:
           - v1-dependencies-{{ checksum "package.json" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
-      - run: yarn
+      - run:
+          name: install dependency
+          command: yarn
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
 
-      - run: yarn storybook:build
+      - run:
+          name: build storybook
+          command: yarn storybook:build
       - persist_to_workspace:
           root: ~/repo
           paths:
+            - .git
             - package.json
             - .storybook/dist
             - node_modules
+            - yarn.lock
 
   publish:
     <<: *defaults
     steps:
       - checkout
-      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-      - run: yarn build
-      - run: npm publish
-  
+      - run:
+          name: set npm TOKEN
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      - run:
+          name: build component
+          command: yarn build
+      - run:
+          name: publish to npm
+          command: npm publish
+
   deploy:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/repo
-      - run: yarn deploy-storybook -- --domain $CIRCLE_PROJECT_REPONAME.surge.sh
+      - <<: *env
+      - run:
+          name: deploy storybook to surge.sh
+          command: yarn deploy-storybook -- --domain ${CIRCLE_PROJECT_REPONAME}$CIRCLE_PR_NUMBER.surge.sh
+      - run: 
+          name: teardown if PR is merged
+          command: |
+            if [[ $MERGE_PR_NUMBER ]]; then
+              yarn surge teardown ${CIRCLE_PROJECT_REPONAME}$MERGE_PR_NUMBER.surge.sh;
+            fi
 
 workflows:
   version: 2

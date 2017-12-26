@@ -1,22 +1,22 @@
 /* eslint-disable react/react-in-jsx-scope */
 
 import { storiesOf } from '@storybook/vue'
-import { action } from '@storybook/addon-actions'
-import { withNotes } from '@storybook/addon-notes'
-import { withDocs } from 'storybook-readme'
-import { withInfo } from '@storybook/addon-info'
 import { storyOrder } from './config.js'
+import { withNotes } from '@storybook/addon-notes'
+// import { action } from '@storybook/addon-actions'
+// import { withDocs } from 'storybook-readme'
+// import { withInfo } from '@storybook/addon-info'
 
-import {
-  text,
-  number,
-  boolean,
-  array,
-  select,
-  color,
-  date,
-  button
-} from '@storybook/addon-knobs'
+// import {
+//   text,
+//   number,
+//   boolean,
+//   array,
+//   select,
+//   color,
+//   date,
+//   button
+// } from '@storybook/addon-knobs'
 
 // import Component from './BasicShape/Circle.vue'
 // storiesOf('storyName', module).add('componentName', () => {

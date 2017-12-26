@@ -29,7 +29,7 @@ masterOptions({
   hierarchySeparator: /\/|\./
 })
 
-/** BUG: Vue Component not supported
+/** BUG: Vue Component not yet supported
 infoOptions({
   header: false, // Toggles display of header with component name and description
   inline: true, // Displays info inline vs click button to view
