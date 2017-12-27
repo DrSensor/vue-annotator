@@ -1,6 +1,6 @@
 <template>
   <svg ref="svg" :width="w" :height="h">
-    <foreignObject x="0" y="0" :width="w" :height="h">
+    <foreignObject ref="bgSvg" x="0" y="0" :width="w" :height="h">
       <div ref="bg" class="background">
         <slot></slot>
       </div>
@@ -14,6 +14,7 @@
 <script>
 import interact from 'interactjs'
 import SVG from 'svg.js'
+import 'svg.select.js'
 
 export default {
   props: {
@@ -22,13 +23,14 @@ export default {
     inertia: Boolean,
     grid: {
       type: [Array, Number],
-      validator: (value) => (value.length == 2 && value.every(v => typeof (v) === 'number')) || (typeof (value) === 'number')
+      validator: (value) => (value.length == 2 && value.every(v => typeof v === 'number')) || (typeof (value) === 'number')
     },
     minSize: {
       type: [Array, Number],
       default: () => 10,
-      validator: (value) => (value.length == 2 && value.every(v => typeof (v) === 'number')) || (typeof (value) === 'number')
+      validator: (value) => (value.length == 2 && value.every(v => typeof v === 'number')) || (typeof (value) === 'number')
     },
+    multipleSelect: Boolean
   },
 
   data () {
@@ -45,6 +47,8 @@ export default {
 
   mounted () {
     const master = SVG(this.$refs.svg)
+    const background = SVG.adopt(this.$refs.bgSvg)
+    const foreground = SVG.adopt(this.$refs.fg)
     if (this.$slots.default) {
       const media = this.$slots.default.filter(el => ['img', 'video', 'audio', 'picture'].includes(el.tag))
       const interval = setInterval(() => {
@@ -61,7 +65,36 @@ export default {
 
     let [minWidth, minHeight] = typeof (this.minSize) === 'number' ? [this.minSize, this.minSize] : this.minSize
 
-    for (const el of this.$slots.annotation)
+    this.$slots.annotation.forEach((el, id) => {
+      const annotator = SVG.adopt(el.elm)
+      let dragend
+
+      annotator.click(event => {
+        if (!dragend) {
+          const selector = annotator.selectize({
+            deepSelect: true,
+            rotationPoint: false,
+            points: true
+          })
+          this.$emit('select', selector)
+          const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
+  
+          remove('.svg_select_boundingRect')
+          if (['circle', 'ellipse'].includes(selector.type)) { // remove edges selector for 'circle' and 'ellipse'
+            remove('.svg_select_points_lt')
+            remove('.svg_select_points_rt')
+            remove('.svg_select_points_rb')
+            remove('.svg_select_points_lb')
+          } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
+  
+          if (!this.multipleSelect) this.$slots.annotation.forEach((elx, idx) => { if (idx != id) SVG.adopt(elx.elm).selectize(false, { deepSelect: true }) })
+        } else dragend = false
+      })
+
+      background.click(event => {
+        annotator.selectize(false, { deepSelect: true })
+      })
+
       interact(el.elm)
         .draggable({
           inertia: this.inertia,
@@ -75,7 +108,8 @@ export default {
           autoScroll: true,
 
           // call this function on every dragmove event
-          onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
+          onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy),
+          onend: event => dragend = true
         })
 
         .resizable({
@@ -141,15 +175,32 @@ export default {
           }
         })
 
-    /** Resize circle on rotation mode
-    @example
-    let r = target.attr('r') + (event.deltaRect.width || event.deltaRect.height)
-    target.radius(r)
-    */
-    // TODO(rotate): https://codepen.io/drsensor/pen/Vyjaao
+      /** Resize circle on rotation mode
+      @example
+      let r = target.attr('r') + (event.deltaRect.width || event.deltaRect.height)
+      target.radius(r)
+      */
+      // TODO(rotate): https://codepen.io/drsensor/pen/Vyjaao
+    })
   }
 }
 </script>
+
+<style>
+.svg_select_points {
+  stroke-width: 1;
+  fill: black;
+  stroke-dasharray: 10 10;
+  stroke: black;
+  stroke-opacity: 0.8;
+  pointer-events: none; /* This ons is needed if you want to deselect or drag the shape*/
+}
+
+.svg_select_boundingRect {
+  display: none;
+}
+</style>
+
 
 <style scoped>
 .foreground {

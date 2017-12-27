@@ -37,10 +37,18 @@ import { withNotes } from '@storybook/addon-notes'
 // })
 
 require.context('.', true, /\.vue$/).keys()
-  .sort((a, b) => {
+  .sort((a, b) => { // sort by storyOrder
     a = a.split('/').map(s => s.replace('.vue', ''))
     b = b.split('/').map(s => s.replace('.vue', ''))
-    return storyOrder.indexOf(a[1]) - storyOrder.indexOf(b[1])
+    let order = storyOrder.indexOf(a[1]) - storyOrder.indexOf(b[1])
+
+    if (!order) { // sort component in alphabetical
+      a = a[a.length - 1].charAt(0).toUpperCase()
+      b = b[b.length - 1].charAt(0).toUpperCase()
+      order = a < b ? -1 : a > b ? 1 : 0
+    }
+
+    return order
   })
   .forEach((filename) => {
     const hierarchy = filename.split('/')

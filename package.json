@@ -1,6 +1,6 @@
 {
   "name": "vue-annotator",
-  "version": "1.0.0",
+  "version": "0.9.0",
   "description": "Vue Component for drawing annotation (box, etc)",
   "main": "dist/vue-annotator.js",
   "author": "Fahmi Akbar Wildana",
@@ -28,8 +28,11 @@
     "storybook-readme": "^3.1.1",
     "surge": "^0.19.0"
   },
+  "peerDependencies": {
+    "svg.js": "^2.6.3"
+  },
   "dependencies": {
     "interactjs": "^1.3.2",
-    "svg.js": "^2.6.3"
+    "svg.select.js": "^2.1.2"
   }
 }

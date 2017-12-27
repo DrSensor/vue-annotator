@@ -1,7 +1,8 @@
 <template>
   <div id="annotation">
     <annotations :minSize="minSize" :width="width" :height="height" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect">
-      <circle class="stroke" slot="annotation" cx="150" cy="150" r="100" />
+      <rect class="stroke" slot="annotation" x="100" y="100" width="100" height="100" />
+      <rect class="stroke" slot="annotation" x="300" y="150" width="170" height="100" />
     </annotations>
   </div>
 </template>
@@ -10,6 +11,7 @@
 /** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
 @code import Annotator from '../../Annotator'
 */
+
 export default {
   props: [
     'minSize',
