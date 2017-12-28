@@ -10,8 +10,8 @@ import { withKnobs } from '@storybook/addon-knobs/dist/vue'
 import Readme from '../README.md'
 import Footer from '../FOOTER.md'
 
-const optionsCallback = (options) => ({ panelExclude: [...options.panelExclude, /Warning/] })
-addDecorator((storyFn, context) => withConsole(optionsCallback)(storyFn)(context))
+// const optionsCallback = (options) => ({ panelExclude: [...options.panelExclude, /Warning/] })
+// addDecorator((storyFn, context) => withConsole(optionsCallback)(storyFn)(context))
 
 addDecorator(withReadme(Readme))
 withDocs.addFooter(Footer)

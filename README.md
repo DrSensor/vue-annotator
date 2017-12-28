@@ -12,6 +12,7 @@ Create annotation using SVG and HTML element.
 | `height` | width of drawing canvas | `Number` | *optional | height of background |
 | `grid` | set grid for sanpping. `:grid="[w,h]"` for setting width and height. `:grid="w"` for setting grid in square | `Array[2]` or `Number` | optional | `null` |
 | `minSize` | set minimum size of annotation. `:minSize="[w,h]"` for set minimum width and height of annotation size. `:grid="w"` for set minimum width and height of annotation size equal to `w` | `Array[2]` or `Number` | optional | `false` |
+| `drawing` | switch to drawing mode | `Boolean` | optional | `false` |
 | `multipleSelect` | enable multiple select | `Boolean` | optional | `false` |
 
 
@@ -22,7 +23,7 @@ Create annotation using SVG and HTML element.
 |---------- |-------- |---------- |
 | `default` | background element of annotation | Any HTML element |
 | `annotation` | annotation element (accept SVG element) | `<rect>`, `<ellipse>`, `<circle>`, `<polygon>`, `<path>`, `<foreignObject>` |
-| `drawing` (not yet implemented) | *draw element via mouse click&drag | same as `annotation` | 
+| `drawing` | *draw element via mouse click&drag | `<rect>`, `<ellipse>`, `<circle>` | 
 | `select` (not yet implemented) | *texture element to apply when annotation is selected | `<defs>` |
 
 ## Events
@@ -34,5 +35,26 @@ Create annotation using SVG and HTML element.
 
 > Tips: use `element.node.isSameNode(this.$refs.myAnnotation)` for identifying the element.
 
-## Style
+## Style CSS
+> Vue-Annotator use `svg.select.js` with this predefined style that can be override
 
+| Class name | Description | Notes
+|---------- |-------- |--------- |
+| `.svg_select_boundingRect` | define style of rectangle in selected element | only applicable on `<rect>`, `<circle>`, `<ellipse>` |
+| `.svg_select_points` | define style of edge circles in selected element |
+
+default style
+```CSS
+.svg_select_points {
+  stroke-width: 1;
+  fill: black;
+  stroke-dasharray: 10 10;
+  stroke: black;
+  stroke-opacity: 0.8;
+  pointer-events: none; /* This ons is needed if you want to deselect or drag the shape*/
+}
+
+.svg_select_boundingRect {
+  display: none;
+}
+```

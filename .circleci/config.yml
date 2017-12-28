@@ -88,6 +88,9 @@ workflows:
             tags:
               only: /.*/
       - deploy:
+          filters:
+            tags:
+              only: /.*/
           requires:
             - build
       - publish:
