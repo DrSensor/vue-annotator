@@ -36,10 +36,19 @@ export default {
     drawing: Boolean
   },
 
+  watch: {
+    drawing: function (value) {
+      this.drawingable.draggable(value)
+    }
+  },
+
   data () {
     return {
       w: this.width,
-      h: this.height
+      h: this.height,
+      interactables: [],
+      makeInteractable: Function,
+      drawingable: interact(document)
     }
   },
 
@@ -81,17 +90,16 @@ export default {
 
     $haveVNodeMoreThan: (number, slots, callback) => { if (slots) if (slots.length > 1) callback() },
 
-    enableInteraction () {
+    enableInteraction (enabled = true) {
       const master = SVG(this.$refs.svg)
       const background = SVG.adopt(this.$refs.bgSvg)
 
-      this.$slots.annotation.forEach((el, id) => {
-        const annotator = SVG.adopt(el.elm)
-        let dragend
-
-        // SELECT
-        annotator.click(event => {
-          if (!dragend) {
+      this.makeInteractable = node => {
+        const annotator = SVG.adopt(node)
+        console.log(node.nodeName)
+        return interact(node)
+          .on('tap', event => { // select
+            console.log(annotator)
             const selector = annotator.selectize({
               deepSelect: true,
               rotationPoint: false,
@@ -108,16 +116,9 @@ export default {
               remove('.svg_select_points_lb')
             } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
 
-            if (!this.multipleSelect) this.$slots.annotation.forEach((elx, idx) => { if (idx != id) SVG.adopt(elx.elm).selectize(false, { deepSelect: true }) })
-          } else dragend = false
-        })
+            if (!this.multipleSelect) this.$slots.annotation.forEach(el => { if (!node.isSameNode(el.elm)) SVG.adopt(el.elm).selectize(false, { deepSelect: true }) })
+          })
 
-        background.click(event => {
-          annotator.selectize(false, { deepSelect: true })
-        })
-        // END SELECT
-
-        interact(el.elm)
           .draggable({
             inertia: this.inertia,
             snap: { targets: [this.gridTarget] },
@@ -130,22 +131,23 @@ export default {
             autoScroll: true,
 
             // call this function on every dragmove event
-            onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy),
-            onend: event => dragend = true
+            onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
           })
+
           .resizable({
             inertia: this.inertia,
             snap: { targets: [this.gridTarget] },
-            // resize from all edges and corners
+            // // resize from all edges and corners
             edges: { left: true, right: true, bottom: true, top: true },
 
-            // keep the edges inside the parent
+            // // keep the edges inside the parent
             restrictEdges: {
               outer: 'svg',
+              elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
             },
             autoScroll: true,
 
-            // minimum size
+            // // minimum size
             restrictSize: {
               min: { width: this.minWidth, height: this.minHeight },
             },
@@ -196,47 +198,58 @@ export default {
             }
           })
 
-        /** Resize circle on rotation mode
-        @example
-        let r = target.attr('r') + (event.deltaRect.width || event.deltaRect.height)
-        target.radius(r)
-        */
-        // TODO(rotate): https://codepen.io/drsensor/pen/Vyjaao
+        background.click(event => { annotator.selectize(false, { deepSelect: true }) }) // unselect
+      }
+
+      if (this.$slots.annotation) this.$slots.annotation.forEach((el, id) => {
+        if (!enabled && this.interactables.length) {
+          this.interactables.forEach(interaction => interaction.off('tap').draggable(false).resizable(false))
+          background.off('click')
+        }
+        else this.interactables[id] = this.makeInteractable(el.elm)
       })
     },
 
-    enableDrawing () {
+    enableDrawing (enabled = true) {
       const background = SVG.adopt(this.$refs.bgSvg)
-      background.style('cursor', 'crosshair')
 
-      let annotator
-      interact(background.node).styleCursor(false)
-        .draggable({
-          inertia: this.inertia,
-          snap: { targets: [this.gridTarget] },
-          restrict: 'svg', // allow drawing only in background element (outside annotation)
-          autoScroll: true,
-          onstart: event => {
-            this.$haveVNodeMoreThan(1, this.$slots.drawing, () => {
-              throw Error(`only 1 slot="drawing" allowed, you have ${this.$slots.drawing.length} slot="drawing"`)
-            })
-            this.$pushVNode2Slot('drawing', this.$cloneVNode(this.$slots.drawing[0])) //duplicate node
+      if (enabled) {
+        background.style('cursor', 'crosshair')
 
-            annotator = SVG.adopt(this.$slots.drawing[1].elm)
-            annotator.draw('point', event).style('cursor', 'crosshair')
-          },
-          onmove: event => annotator.draw('update', event),
-          onend: event => {
-            annotator.draw('stop', event).style('cursor', null)
-            this.$pushVNode2Slot('annotation', this.$slots.drawing.pop())
-          }
-        })
+        let annotator
+        this.drawingable = interact(background.node).styleCursor(false)
+          .draggable({
+            inertia: this.inertia,
+            snap: { targets: [this.gridTarget] },
+            restrict: 'svg', // allow drawing only in background element (outside annotation)
+            autoScroll: true,
+            onstart: event => {
+              this.$haveVNodeMoreThan(1, this.$slots.drawing, () => {
+                throw Error(`only 1 slot="drawing" allowed, you have ${this.$slots.drawing.length} slot="drawing"`)
+              })
+              this.$pushVNode2Slot('drawing', this.$cloneVNode(this.$slots.drawing[0])) //duplicate node
+              annotator = SVG.adopt(this.$slots.drawing[1].elm) // strange be haviour, shift() with drawing[0] will make error
+              annotator.draw('point', event)
+                .style('cursor', 'crosshair')
+            },
+            onmove: event => annotator.draw('update', event),
+            onend: event => {
+              annotator.draw('stop', event).style('cursor', null)
+              this.$pushVNode2Slot('annotation', this.$slots.drawing.pop()) // strange be haviour, shift() with drawing[0] will make error
+            }
+          })
+      }
+      else this.drawingable.draggable(false)
     }
   },
 
-  updated () {
+  updated (el) {
     this.w = this.width || this.$refs.bg.scrollWidth
     this.h = this.width || this.$refs.bg.scrollHeight
+
+    if ((this.$slots.annotation ? this.$slots.annotation.length : 0) > this.interactables.length) {
+      this.interactables.push(this.makeInteractable(this.$slots.annotation[this.$slots.annotation.length - 1].elm))
+    }
   },
 
   mounted () {
@@ -249,11 +262,8 @@ export default {
       }, 43.48)
     } else this.$forceUpdate()
 
-    if (this.drawing) {
-      this.enableDrawing()
-    } else {
-      this.enableInteraction()
-    }
+    this.enableInteraction()
+    this.enableDrawing(this.drawing)
   }
 }
 </script>
