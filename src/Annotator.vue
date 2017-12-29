@@ -94,7 +94,7 @@ export default {
       const master = SVG(this.$refs.svg)
       const background = SVG.adopt(this.$refs.bgSvg)
 
-      this.makeInteractable = node => {
+      this.makeInteractable = (node, fixDrawingMode = false) => {
         const annotator = SVG.adopt(node)
         console.log(node.nodeName)
         return interact(node)
@@ -141,14 +141,14 @@ export default {
             edges: { left: true, right: true, bottom: true, top: true },
 
             // // keep the edges inside the parent
-            restrictEdges: {
+            restrictEdges: fixDrawingMode ? undefined : {
               outer: 'svg',
               elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
             },
             autoScroll: true,
 
             // // minimum size
-            restrictSize: {
+            restrictSize: fixDrawingMode ? undefined : {
               min: { width: this.minWidth, height: this.minHeight },
             },
 
@@ -248,7 +248,10 @@ export default {
     this.h = this.width || this.$refs.bg.scrollHeight
 
     if ((this.$slots.annotation ? this.$slots.annotation.length : 0) > this.interactables.length) {
-      this.interactables.push(this.makeInteractable(this.$slots.annotation[this.$slots.annotation.length - 1].elm))
+      // const fixDrawMode = (this.$slots.annotation.length == 1) // BUG: only make all previous draw disappear at second draw
+      const element = this.$slots.annotation[this.$slots.annotation.length - 1].elm
+      const interaction = this.makeInteractable(element, this.drawing)
+      this.interactables.push(interaction)
     }
   },
 
