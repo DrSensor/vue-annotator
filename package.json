@@ -1,6 +1,6 @@
 {
   "name": "vue-annotator",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Vue Component for drawing annotation (box, etc)",
   "homepage": "http://vue-annotator.surge.sh",
   "keyword": [

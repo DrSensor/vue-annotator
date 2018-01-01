@@ -83,14 +83,8 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build:
-          filters:
-            tags:
-              only: /.*/
+      - build
       - deploy:
-          filters:
-            tags:
-              only: /.*/
           requires:
             - build
       - publish:
@@ -99,5 +93,4 @@ workflows:
               only: /^v\d+[.]\d+[.]\d+$/
             branches:
               ignore: /.*/
-          requires:
-            - build
+

@@ -1,9 +1,13 @@
 <template>
   <div id="annotation">
-    <annotations drawing :inertia="inertia" :minSize="minSize" :width="width" :height="height" :grid="grid">
+    <button @click="drawing = !drawing">{{drawing ? "stop" : "drawing" }}</button>
+    <annotations :drawing="drawing" :inertia="inertia" :minSize="minSize" :width="width" :height="height" :grid="grid">
+      <img draggable="false" src="https://cdn.css-tricks.com/wp-content/uploads/2017/01/vue-2-1.jpg" />
       <!-- <polygon class="stroke" slot="drawing" /> not supported yet -->
       <rect class="stroke" slot="drawing" />
       <!-- <circle class="stroke" slot="drawing" /> -->
+      <rect class="stroke" slot="annotation" x="300" y="150" width="170" height="100" />
+
       <!-- <ellipse class="stroke" slot="drawing" /> -->
     </annotations>
   </div>
@@ -23,6 +27,11 @@ export default {
     'height',
     'inertia'
   ],
+  data () {
+    return {
+      drawing: true,
+    }
+  },
   components: {
     annotations: () => import('../../Annotator')
   }
