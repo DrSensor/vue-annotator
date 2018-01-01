@@ -3,7 +3,27 @@
 
 Create annotation using SVG and HTML element.
 
-## Props
+## Usage
+```html
+<annotator inertia
+  :drawing="enableDrawingMode"
+  @select="openDialog"
+  :minSize="[50, 50]"
+  :grid="[5, 5]"
+  :multipleSelect="keyIsDown.Ctrl"
+>
+
+    <img draggable="false" src="background.png" />
+
+    <rect slot="annotation" stroke="green" x="300" y="150" width="170" height="100" />
+    <polygon slot="annotation" stroke="purple" points="200,10 250,190 160,210" />
+
+    <rect slot="drawing" stroke="red" />
+
+</annotator>
+```
+
+### Props
 > \* : must be set if no background
 
 | Parameters | Description | Type | Must Specify | Default value |
@@ -13,10 +33,11 @@ Create annotation using SVG and HTML element.
 | `grid` | set grid for sanpping. `:grid="[w,h]"` for setting width and height. `:grid="w"` for setting grid in square | `Array[2]` or `Number` | optional | `null` |
 | `minSize` | set minimum size of annotation. `:minSize="[w,h]"` for set minimum width and height of annotation size. `:grid="w"` for set minimum width and height of annotation size equal to `w` | `Array[2]` or `Number` | optional | `false` |
 | `drawing` | switch to drawing mode | `Boolean` | optional | `false` |
+| `inertia` | enable inertia moment animation when interacting | `Boolean` | optional | `false` |
 | `multipleSelect` | enable multiple select | `Boolean` | optional | `false` |
 
 
-## Slots
+### Slots
 > \* : will error when more than 1 element to be provided
 
 | Method name | Description | Accepted Element |
@@ -26,7 +47,7 @@ Create annotation using SVG and HTML element.
 | `drawing` | *draw element via mouse click&drag | `<rect>`, `<ellipse>`, `<circle>` | 
 | `select` (not yet implemented) | *texture element to apply when annotation is selected | `<defs>` |
 
-## Events
+### Events
 | Event name | Description | Parameters |
 |---------- |-------- |---------- |
 | `select` | emit when element is click/select | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
@@ -35,7 +56,7 @@ Create annotation using SVG and HTML element.
 
 > Tips: use `element.node.isSameNode(this.$refs.myAnnotation)` for identifying the element.
 
-## Style CSS
+### Style CSS
 > Vue-Annotator use `svg.select.js` with this predefined style that can be override
 
 | Class name | Description | Notes

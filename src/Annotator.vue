@@ -26,6 +26,7 @@ import 'svg.draw.js'
 // import { printSlotElement } from './debug'
 
 export default {
+  name: 'Annotator',
   props: {
     width: Number,
     height: Number,
