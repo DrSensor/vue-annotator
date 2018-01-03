@@ -54,11 +54,11 @@ jobs:
       - run:
           name: set npm TOKEN
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      - attach_workspace:
+          at: ~/repo
       - run:
           name: build component
-          command: |
-            yarn
-            yarn build
+          command: yarn build
       - run:
           name: publish to npm
           command: npm publish
@@ -83,11 +83,16 @@ workflows:
   version: 2
   build_and_publish:
     jobs:
-      - build
+      - build:
+          filters:
+            tags:
+              only: /.*/
       - deploy:
           requires:
             - build
       - publish:
+          requires:
+            - build
           filters:
             tags:
               only: /^v\d+[.]\d+[.]\d+$/
