@@ -1,7 +1,7 @@
 <template>
   <svg ref="svg" :width="w" :height="h">
 
-    <foreignObject ref="bgSvg" x="0" y="0" :width="w" :height="h">
+    <foreignObject oncontextmenu="return false;" ref="bgSvg" x="0" y="0" :width="w" :height="h">
       <div ref="bg" class="background">
         <slot></slot>
       </div>
@@ -133,7 +133,7 @@ export default {
           deepSelect: true,
           rotationPoint: false,
           points: true
-        }).attr('data-selected', true)
+        }).data('selected', true)
         this.$emit('select', selector)
         const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
 
@@ -151,8 +151,8 @@ export default {
               const shape = SVG.adopt(elm)
               shape.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(shape.type) })
 
-              if (shape.attr('data-selected')) {
-                shape.attr('data-selected', null)
+              if (shape.data('selected')) {
+                shape.data('selected', null)
                 this.$emit('unselect', shape)
               }
             }
@@ -161,8 +161,8 @@ export default {
 
       const unselectListener = event => {
         annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
-        if (annotator.attr('data-selected')) {
-          annotator.attr('data-selected', null)
+        if (annotator.data('selected')) {
+          annotator.data('selected', null)
           this.$emit('unselect', annotator)
         }
       }
@@ -272,7 +272,7 @@ export default {
         })
         this.background.style('cursor', 'crosshair')
 
-        let annotator
+        let annotator, attr = {}
         this.drawingable = interact(this.background.node).styleCursor(false)
           .draggable({
             inertia: this.inertia,
@@ -281,18 +281,32 @@ export default {
             autoScroll: true,
 
             onstart: event => {
-
               annotator = SVG.adopt(this.$slots.drawing[0].elm).clone() // strange behaviour, shift() with drawing[0] will make error
-              annotator.draw('point', event).style('cursor', 'crosshair').addClass('foreground')
+              attr.oncontextmenu = annotator.attr('oncontextmenu')
+              annotator.draw('point', event)
+                .style('cursor', 'crosshair')
+                .addClass('foreground')
+                .attr('oncontextmenu', 'return false;')
+                .on('contextmenu', event => {
+                  annotator.draw('cancel').data('canceled', true)
+                  this.$emit('drawcancel')
+                })
             },
 
             onmove: event => annotator.draw('update', event),
 
             onend: event => {
-              annotator.draw('stop', event).style('cursor', null).removeClass('foreground').toParent(this.annotation)
-              this.$forceUpdate()
+              if (!annotator.data('canceled')) {
+                annotator.draw('stop', event).style('cursor', null).removeClass('foreground').toParent(this.annotation).off('contextmenu')
+                this.$forceUpdate()
+                this.$emit('drawfinish', annotator)
+              } else annotator.off('contextmenu').data('canceled', null)
+
+              for (const key in attr)
+                annotator.attr(key, attr[key] || null)
             }
           })
+
       }
       else {
         this.background.style('cursor', 'default')

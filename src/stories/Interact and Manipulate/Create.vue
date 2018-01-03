@@ -1,7 +1,8 @@
 <template>
   <div id="annotation">
     <button @click="drawing = !drawing">{{drawing ? "stop" : "drawing" }}</button>
-    <annotations :drawing="drawing" :inertia="inertia" :minSize="minSize" :width="width" :height="height" :grid="grid">
+    <annotations :drawing="drawing" :inertia="inertia" :minSize="minSize" :width="width" :height="height" :grid="grid"
+                 @drawfinish="drawfinish" @drawcancel="drawcancel">
       <img draggable="false" src="https://cdn.css-tricks.com/wp-content/uploads/2017/01/vue-2-1.jpg" />
       <!-- <polygon class="stroke" slot="drawing" /> not supported yet -->
       <rect class="stroke" slot="drawing" />
@@ -34,6 +35,15 @@ export default {
   },
   components: {
     annotations: () => import('../../Annotator')
+  },
+
+  methods: {
+    drawfinish (element) {
+      setTimeout(() => alert(`finish drawing <${element.type}>`), 500)
+    },
+    drawcancel () {
+      setTimeout(() => alert('cancel drawing'), 500)
+    }
   }
 }
 </script>
