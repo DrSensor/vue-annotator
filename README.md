@@ -1,5 +1,6 @@
 # vue-annotator
-[![CircleCI](https://circleci.com/gh/DrSensor/vue-annotator.svg?style=svg)](https://circleci.com/gh/DrSensor/vue-annotator)
+[![CircleCI](https://circleci.com/gh/DrSensor/vue-annotator.svg?style=shield)](https://circleci.com/gh/DrSensor/vue-annotator)
+[![donate](https://img.shields.io/badge/$-donate-ff69b4.svg?maxAge=2592000&style=flat-square)](./DONATE.md)
 
 Create annotation using SVG and HTML element.
 
@@ -79,3 +80,13 @@ default style
   display: none;
 }
 ```
+
+## Support
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributing directly via:
+- [Pull Requests](./CONTRIBUTING.md/#Pull-Request) or
+- [Create Issues](./CONTRIBUTING.md/#Create-Issue)
+
+For donation see [DONATE.md](./DONATE.md)
+
+## License
+[MIT](./LICENSE) License
