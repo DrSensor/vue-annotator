@@ -56,7 +56,6 @@ export default {
       w: this.width,
       h: this.height,
       interactables: [],
-      makeInteractable: Function,
       drawingable: undefined,
       background: SVG.adopt(this.$refs.bgSvg),
       annotation: SVG.adopt(this.$refs.annotation)
@@ -126,129 +125,136 @@ export default {
       this.$emit('select', selector)
     },
     */
+    makeInteractable (node, fixDrawingMode = false) {
+      const annotator = SVG.adopt(node)
 
-    enableInteraction (enabled = true) {
-      const master = SVG(this.$refs.svg)
+      const selectListener = event => {
+        const selector = annotator.selectize({
+          deepSelect: true,
+          rotationPoint: false,
+          points: true
+        }).attr('data-selected', true)
+        this.$emit('select', selector)
+        const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
 
-      // TODO: separate to Vue.methods
-      this.makeInteractable = (node, fixDrawingMode = false) => {
-        const annotator = SVG.adopt(node)
+        remove('.svg_select_boundingRect')
+        if (['circle', 'ellipse'].includes(selector.type)) { // remove edges selector for 'circle' and 'ellipse'
+          remove('.svg_select_points_lt')
+          remove('.svg_select_points_rt')
+          remove('.svg_select_points_rb')
+          remove('.svg_select_points_lb')
+        } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
 
-        const selectListener = event => {
-          const selector = annotator.selectize({
-            deepSelect: true,
-            rotationPoint: false,
-            points: true
-          })
-          this.$emit('select', selector)
-          const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
+        if (!this.multipleSelect)
+          this.$refs.annotation.childNodes.forEach(elm => {
+            if (!node.isSameNode(elm)) {
+              const shape = SVG.adopt(elm)
+              shape.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(shape.type) })
 
-          remove('.svg_select_boundingRect')
-          if (['circle', 'ellipse'].includes(selector.type)) { // remove edges selector for 'circle' and 'ellipse'
-            remove('.svg_select_points_lt')
-            remove('.svg_select_points_rt')
-            remove('.svg_select_points_rb')
-            remove('.svg_select_points_lb')
-          } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
-
-          if (!this.multipleSelect)
-            this.$refs.annotation.childNodes.forEach(elm => {
-              if (!node.isSameNode(elm)) {
-                const shape = SVG.adopt(elm)
-                shape.selectize(false, { deepSelect: ['g', 'foreignObject'].includes(shape.type) })
-              }
-            })
-        }
-
-        const unselectListener = event => {
-          annotator.selectize(false, { deepSelect: ['g', 'foreignObject'].includes(annotator.type) })
-        }
-
-        const interaction = interact(node)
-          .draggable({
-            inertia: this.inertia,
-            snap: { targets: [this.gridTarget] },
-
-            // keep the element within the area of it's parent
-            restrict: {
-              restriction: 'svg',
-              elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-            },
-            autoScroll: true,
-
-            // call this function on every dragmove event
-            onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
-          })
-
-          .resizable({
-            inertia: this.inertia,
-            snap: { targets: [this.gridTarget] },
-            // // resize from all edges and corners
-            edges: { left: true, right: true, bottom: true, top: true },
-
-            // // keep the edges inside the parent
-            restrictEdges: fixDrawingMode ? undefined : {
-              outer: 'svg',
-              elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-            },
-            autoScroll: true,
-
-            // // minimum size
-            restrictSize: fixDrawingMode ? undefined : {
-              min: { width: this.minWidth, height: this.minHeight },
-            },
-
-            // call this function on every resizemove event
-            onmove: (event) => {
-              const target = SVG.adopt(event.target)
-
-              let x = target.x() + event.deltaRect.left
-              let y = target.y() + event.deltaRect.top
-              switch (target.type) {
-                case 'ellipse':
-                  target.move(x + event.deltaRect.width / 2, y + event.deltaRect.height / 2)
-                  target.size(event.rect.width, event.rect.height)
-                  break
-                case 'circle':
-                  const antiPhytagoras = (x, y) => x != 0 && y != 0 && Math.sign(x) != Math.sign(y) ? 0 : Math.sign(x + y) * Math.hypot(event.deltaRect.width, event.deltaRect.height)
-                  const delta = antiPhytagoras(event.deltaRect.width, event.deltaRect.height)
-                  const d = s => delta != 0 ? (s / 2) : 0
-                  const threshold = (this.minWidth + this.minHeight) / 2 // because deltaRect will keep going when resizing in diagonal
-
-                  // BUG: still have slight move when resizing diagonally
-                  if (event.rect.width > threshold && event.rect.height > threshold) {
-                    x += d(event.deltaRect.width)
-                    y += d(event.deltaRect.height)
-                  } else {
-                    x = target.x()
-                    y = target.y()
-                  }
-
-                  let diameter = target.attr('r') * 2 + delta
-                  diameter = Math.max(diameter, threshold)
-
-                  // Enable resizing when circle in edge of canvas
-                  const notEdgeTopLeft = x + Math.abs(event.deltaRect.width) >= 0 && y + Math.abs(event.deltaRect.height) >= 0
-                  const notEdgeBottomRight = (x + diameter) <= master.width() + Math.abs(event.deltaRect.width) && (y + diameter) <= master.height() + Math.abs(event.deltaRect.height)
-
-                  if (notEdgeBottomRight && notEdgeTopLeft) {
-                    target.move(x, y)
-                    target.size(diameter)
-                  }
-                  break
-                default:
-                  target.move(x, y)
-                  target.size(event.rect.width, event.rect.height)
-                  break
+              if (shape.attr('data-selected')) {
+                shape.attr('data-selected', null)
+                this.$emit('unselect', shape)
               }
             }
           })
-
-        interaction.on('tap', selectListener)
-        this.background.on('click', unselectListener)
-
-        return interaction
       }
+
+      const unselectListener = event => {
+        annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
+        if (annotator.attr('data-selected')) {
+          annotator.attr('data-selected', null)
+          this.$emit('unselect', annotator)
+        }
+      }
+
+      const interaction = interact(node)
+        .draggable({
+          inertia: this.inertia,
+          snap: { targets: [this.gridTarget] },
+
+          // keep the element within the area of it's parent
+          restrict: {
+            restriction: 'svg',
+            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+          },
+          autoScroll: true,
+
+          // call this function on every dragmove event
+          onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
+        })
+
+        .resizable({
+          inertia: this.inertia,
+          snap: { targets: [this.gridTarget] },
+          // // resize from all edges and corners
+          edges: { left: true, right: true, bottom: true, top: true },
+
+          // // keep the edges inside the parent
+          restrictEdges: fixDrawingMode ? undefined : {
+            outer: 'svg',
+            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+          },
+          autoScroll: true,
+
+          // // minimum size
+          restrictSize: fixDrawingMode ? undefined : {
+            min: { width: this.minWidth, height: this.minHeight },
+          },
+
+          // call this function on every resizemove event
+          onmove: (event) => {
+            const target = SVG.adopt(event.target)
+
+            let x = target.x() + event.deltaRect.left
+            let y = target.y() + event.deltaRect.top
+            switch (target.type) {
+              case 'ellipse':
+                target.move(x + event.deltaRect.width / 2, y + event.deltaRect.height / 2)
+                target.size(event.rect.width, event.rect.height)
+                break
+              case 'circle':
+                const antiPhytagoras = (x, y) => x != 0 && y != 0 && Math.sign(x) != Math.sign(y) ? 0 : Math.sign(x + y) * Math.hypot(event.deltaRect.width, event.deltaRect.height)
+                const delta = antiPhytagoras(event.deltaRect.width, event.deltaRect.height)
+                const d = s => delta != 0 ? (s / 2) : 0
+                const threshold = (this.minWidth + this.minHeight) / 2 // because deltaRect will keep going when resizing in diagonal
+
+                // BUG: still have slight move when resizing diagonally
+                if (event.rect.width > threshold && event.rect.height > threshold) {
+                  x += d(event.deltaRect.width)
+                  y += d(event.deltaRect.height)
+                } else {
+                  x = target.x()
+                  y = target.y()
+                }
+
+                let diameter = target.attr('r') * 2 + delta
+                diameter = Math.max(diameter, threshold)
+
+                // Enable resizing when circle in edge of canvas
+                const notEdgeTopLeft = x + Math.abs(event.deltaRect.width) >= 0 && y + Math.abs(event.deltaRect.height) >= 0
+                const notEdgeBottomRight = (x + diameter) <= master.width() + Math.abs(event.deltaRect.width) && (y + diameter) <= master.height() + Math.abs(event.deltaRect.height)
+
+                if (notEdgeBottomRight && notEdgeTopLeft) {
+                  target.move(x, y)
+                  target.size(diameter)
+                }
+                break
+              default:
+                target.move(x, y)
+                target.size(event.rect.width, event.rect.height)
+                break
+            }
+          }
+        })
+
+      interaction.on('tap', selectListener)
+      this.background.on('click', unselectListener)
+
+      return interaction
+    },
+
+    enableInteraction (enabled = true) {
+      const master = SVG(this.$refs.svg)
 
       if (this.$refs.annotation.hasChildNodes()) this.$refs.annotation.childNodes.forEach((node, id) => {
         if (!enabled && this.interactables.length) {
@@ -307,7 +313,7 @@ export default {
 
       /** @see https://github.com/vuejs/vue/issues/7347#issuecomment-354641887
       @func this.$slots.annotation.push(toVNode(element)) 
-      */ 
+      */
     }
   },
 

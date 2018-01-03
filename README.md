@@ -52,8 +52,9 @@ Create annotation using SVG and HTML element.
 | Event name | Description | Parameters |
 |---------- |-------- |---------- |
 | `select` | emit when element is click/select | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
-| `drawdone` (not yet implemented) | emit when drawing element is finish | element: `DOM.Element` |
-| `drawcancel` (not yet implemented) | emit when drawing element is canceled (via right click) | element: `DOM.Element` |
+| `unselect` | emit when element is unselected (by clicking the background) | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `drawfinish` | emit when drawing element is finish | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `drawcancel` (not yet implemented) | emit when drawing element is canceled (via right click) | |
 
 > Tips: use `element.node.isSameNode(this.$refs.myAnnotation)` for identifying the element.
 
