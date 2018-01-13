@@ -1,8 +1,8 @@
 <template>
   <div id="annotation">
     <button @click="drawing = !drawing">{{drawing ? "stop" : "drawing" }}</button>
-    <annotations :drawing="drawing" :inertia="inertia" :minSize="minSize" :width="width" :height="height" :grid="grid"
-                 @drawfinish="drawfinish" @drawcancel="drawcancel">
+    <annotations :drawing="drawing" :inertia="inertia" :minSize="minSize" :grid="grid" :multipleSelect="multipleSelect"
+                @drawfinish="drawfinish" @drawcancel="drawcancel">
       <img draggable="false" src="https://cdn.css-tricks.com/wp-content/uploads/2017/01/vue-2-1.jpg" />
       <!-- <polygon class="stroke" slot="drawing" /> not supported yet -->
       <rect class="stroke" slot="drawing" />
@@ -20,17 +20,16 @@
 */
 import SVG from 'svg.js'
 
+import { number, boolean } from '@storybook/addon-knobs/dist/vue'
+
 export default {
-  props: [
-    'minSize',
-    'grid',
-    'width',
-    'height',
-    'inertia'
-  ],
   data () {
     return {
       drawing: true,
+      minSize: number('minimum diameter', 50),
+      grid: [number('gird width', 0), number('gird height', 0)],
+      inertia: boolean('enable inertia', true),
+      multipleSelect: boolean('enable multiple select', false)
     }
   },
   components: {
@@ -39,10 +38,10 @@ export default {
 
   methods: {
     drawfinish (element) {
-      setTimeout(() => alert(`finish drawing <${element.type}>`), 500)
+      this.$action(`finish drawing`, `<${element.type}>`, 'sdsd')
     },
     drawcancel () {
-      setTimeout(() => alert('cancel drawing'), 500)
+      this.$action('cancel drawing')
     }
   }
 }

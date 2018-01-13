@@ -6,7 +6,16 @@ import { storyOrder, scenarioOrder } from './config.js'
 // import { withNotes } from '@storybook/addon-notes'
 // import { withDocs } from 'storybook-readme'
 
-import { action } from '@storybook/addon-actions'
+import { decorateAction } from '@storybook/addon-actions'
+import Vue from 'vue'
+
+Vue.mixin({
+  methods: {
+    $action (label, payload) {
+      this.$emit('action', label, payload)
+    }
+  }
+})
 
 const orderedFile = require.context('.', true, /\.vue$/).keys()
   .sort((a, b) => { // sort by storyOrder
@@ -42,10 +51,13 @@ orderedFile.forEach((filename) => {
     const Component = require(`${filename}`).default
 
     const story = () => {
-      let eventCounter = 0
       return {
         render () {
-          return <story onAction={action(`action ${++eventCounter}`)} />
+          const action = decorateAction([
+            args => [args[0], args[1]]
+          ])
+
+          return <story onAction={action(`${storyName}/${componentName}`)} />
         },
         components: {
           'story': Component

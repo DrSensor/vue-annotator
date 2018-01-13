@@ -7,7 +7,7 @@
       </div>
     </foreignObject>
 
-    <g ref="annotation" class="foreground">
+    <g ref="annotations" class="foreground">
       <slot name="annotation"></slot>
     </g>
 
@@ -23,321 +23,56 @@ import 'svg.select.js'
 import 'svg.draw.js'
 
 // import { printSlotElement } from 'utils/debug'
+import { manipulate, drawing, select } from 'mixins'
 
 export default {
   name: 'Annotator',
+  mixins: [manipulate, drawing, select],
   props: {
     width: {
       type: [Number, String],
-      validator: (value) => !isNaN(value)
+      validator: (value) => !isNaN(value) || value === undefined
     },
     height: {
       type: [Number, String],
-      validator: (value) => !isNaN(value)
+      validator: (value) => !isNaN(value) || value === undefined
     },
-    inertia: Boolean,
-    grid: {
-      type: [Array, Number],
-      validator: (value) => (value.length == 2 && value.every(v => typeof v === 'number')) || (typeof (value) === 'number')
-    },
-    minSize: {
-      type: [Array, Number],
-      default: () => 10,
-      validator: (value) => (value.length == 2 && value.every(v => typeof v === 'number')) || (typeof (value) === 'number')
-    },
-    multipleSelect: Boolean,
-    drawing: Boolean
+    drawing: Boolean,
+    noInteract: Boolean,
+    noSelect: Boolean
   },
 
   watch: {
     drawing: function (value) {
       this.enableDrawing(value)
-      // this.unselectAll()
-    }
+    },
+    noInteract: function (value) {
+      this.enableInteraction(value)
+    },
+    noSelect: function (value) {
+      this.enableSelection(value)
+    },
   },
 
   data () {
     return {
-      w: parseInt(this.width),
-      h: parseInt(this.height),
-      interactables: [],
-      drawingable: undefined,
+      w: parseInt(this.width) || 0,
+      h: parseInt(this.height) || 0,
       background: SVG.adopt(this.$refs.bgSvg),
-      annotation: SVG.adopt(this.$refs.annotation)
-    }
-  },
-
-  computed: {
-    gridTarget: function () {
-      return this.grid ? interact.createSnapGrid({
-        x: this.grid[0],
-        y: this.grid[1],
-      }) : null
-    },
-    minWidth: function () {
-      return typeof (this.minSize) === 'number' ? this.minSize : this.minSize[0]
-    },
-    minHeight: function () {
-      return typeof (this.minSize) === 'number' ? this.minSize : this.minSize[1]
+      annotations: SVG.adopt(this.$refs.annotations)
     }
   },
 
   methods: {
-    $_haveVNodeMoreThan: (number, slots, callback) => { if (slots) if (slots.length > 1) callback() },
 
-    /** CURRENTLY NOT BEING USED
-     * @code
-    enableUnselect () {
-      if (this.$refs.annotation.hasChildNodes())
-        this.$refs.annotation.childNodes.forEach((elm, id) => this.background.click(event => {
-          const shape = SVG.adopt(elm)
-          shape.selectize(false, { deepSelect: ['g', 'foreignObject'].includes(shape.type) })
-        }))
-    },
-
-    disableSelect () {
-      this.interactables.off('tap', this.$_selectListener)
-    },
-
-    unselectAll () {
-      if (this.$refs.annotation.hasChildNodes())
-        this.$refs.annotation.childNodes.forEach((elm, id) => {
-          const shape = SVG.adopt(elm)
-          shape.selectize(false, { deepSelect: ['g', 'foreignObject'].includes(shape.type) })
-        })
-    },
-
-    selectAll () {
-      let selector = []
-
-      if (this.$refs.annotation.hasChildNodes()) this.$refs.annotation.childNodes.forEach((el, id) => {
-        selector[id] = SVG.adopt(el.elm).selectize({
-          deepSelect: true,
-          rotationPoint: false,
-          points: true
-        })
-        const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
-
-        remove('.svg_select_boundingRect')
-        if (['circle', 'ellipse'].includes(selector.type)) { // remove edges selector for 'circle' and 'ellipse'
-          remove('.svg_select_points_lt')
-          remove('.svg_select_points_rt')
-          remove('.svg_select_points_rb')
-          remove('.svg_select_points_lb')
-        } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
-      })
-
-      this.$emit('select', selector)
-    },
-    */
-    makeInteractable (node, fixDrawingMode = false) {
-      const master = SVG.adopt(this.$refs.svg)
-      const annotator = SVG.adopt(node)
-
-      const selectListener = event => {
-        const selector = annotator.selectize({
-          deepSelect: true,
-          rotationPoint: false,
-          points: true
-        }).data('selected', true)
-        this.$emit('select', selector)
-        const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
-
-        remove('.svg_select_boundingRect')
-        if (['circle', 'ellipse'].includes(selector.type)) { // remove edges selector for 'circle' and 'ellipse'
-          remove('.svg_select_points_lt')
-          remove('.svg_select_points_rt')
-          remove('.svg_select_points_rb')
-          remove('.svg_select_points_lb')
-        } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
-
-        if (!this.multipleSelect)
-          this.$refs.annotation.childNodes.forEach(elm => {
-            if (!node.isSameNode(elm)) {
-              const shape = SVG.adopt(elm)
-              shape.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(shape.type) })
-
-              if (shape.data('selected')) {
-                shape.data('selected', null)
-                this.$emit('unselect', shape)
-              }
-            }
-          })
-      }
-
-      const unselectListener = event => {
-        annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
-        if (annotator.data('selected')) {
-          annotator.data('selected', null)
-          this.$emit('unselect', annotator)
-        }
-      }
-
-      const interaction = interact(node)
-        .draggable({
-          inertia: this.inertia,
-          snap: { targets: [this.gridTarget] },
-
-          // keep the element within the area of it's parent
-          restrict: {
-            restriction: 'svg',
-            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-          },
-          autoScroll: true,
-
-          // call this function on every dragmove event
-          onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
-        })
-
-        .resizable({
-          inertia: this.inertia,
-          snap: { targets: [this.gridTarget] },
-          // // resize from all edges and corners
-          edges: { left: true, right: true, bottom: true, top: true },
-
-          // // keep the edges inside the parent
-          restrictEdges: fixDrawingMode ? undefined : {
-            outer: 'svg',
-            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
-          },
-          autoScroll: true,
-
-          // // minimum size
-          restrictSize: fixDrawingMode ? undefined : {
-            min: { width: this.minWidth, height: this.minHeight },
-          },
-
-          // call this function on every resizemove event
-          onmove: (event) => {
-            const target = SVG.adopt(event.target)
-
-            let x = target.x() + event.deltaRect.left
-            let y = target.y() + event.deltaRect.top
-            switch (target.type) {
-              case 'ellipse':
-                target.move(x + event.deltaRect.width / 2, y + event.deltaRect.height / 2)
-                target.size(event.rect.width, event.rect.height)
-                break
-              case 'circle':
-                const antiPhytagoras = (x, y) => x != 0 && y != 0 && Math.sign(x) != Math.sign(y) ? 0 : Math.sign(x + y) * Math.hypot(event.deltaRect.width, event.deltaRect.height)
-                const delta = antiPhytagoras(event.deltaRect.width, event.deltaRect.height)
-                const d = s => delta != 0 ? (s / 2) : 0
-                const threshold = (this.minWidth + this.minHeight) / 2 // because deltaRect will keep going when resizing in diagonal
-
-                // BUG: still have slight move when resizing diagonally
-                if (event.rect.width > threshold && event.rect.height > threshold) {
-                  x += d(event.deltaRect.width)
-                  y += d(event.deltaRect.height)
-                } else {
-                  x = target.x()
-                  y = target.y()
-                }
-
-                let diameter = target.attr('r') * 2 + delta
-                diameter = Math.max(diameter, threshold)
-
-                // Enable resizing when circle in edge of canvas
-                const notEdgeTopLeft = x + Math.abs(event.deltaRect.width) >= 0 && y + Math.abs(event.deltaRect.height) >= 0
-                const notEdgeBottomRight = (x + diameter) <= master.width() + Math.abs(event.deltaRect.width) && (y + diameter) <= master.height() + Math.abs(event.deltaRect.height)
-
-                if (notEdgeBottomRight && notEdgeTopLeft) {
-                  target.move(x, y)
-                  target.size(diameter)
-                }
-                break
-              default:
-                target.move(x, y)
-                target.size(event.rect.width, event.rect.height)
-                break
-            }
-          }
-        })
-
-      interaction.on('tap', selectListener)
-      this.background.on('click', unselectListener)
-
-      return interaction
-    },
-
-    enableInteraction (enabled = true) {
-      const master = SVG(this.$refs.svg)
-
-      if (this.$refs.annotation.hasChildNodes()) this.$refs.annotation.childNodes.forEach((node, id) => {
-        if (!enabled && this.interactables.length) {
-          this.interactables.forEach(interaction => interaction.off('tap').draggable(false).resizable(false))
-          this.background.off('click')
-        }
-        else this.interactables[id] = this.makeInteractable(node)
-      })
-    },
-
-    enableDrawing (enabled = true) {
-      if (enabled && (this.drawingable ? !interact.isSet(this.background.node) : true)) {
-        this.$_haveVNodeMoreThan(1, this.$slots.drawing, () => {
-          throw Error(`only 1 slot="drawing" allowed, you have ${this.$slots.drawing.length} slot="drawing"`)
-        })
-        this.background.style('cursor', 'crosshair')
-
-        let annotator, attr = {}
-        this.drawingable = interact(this.background.node).styleCursor(false)
-          .draggable({
-            inertia: this.inertia,
-            snap: { targets: [this.gridTarget] },
-            restrict: 'svg', // allow drawing only in background element (outside annotation)
-            autoScroll: true,
-
-            onstart: event => {
-              annotator = SVG.adopt(this.$slots.drawing[0].elm).clone() // strange behaviour, shift() with drawing[0] will make error
-              attr.oncontextmenu = annotator.attr('oncontextmenu')
-              annotator.draw('point', event)
-                .style('cursor', 'crosshair')
-                .addClass('foreground')
-                .attr('oncontextmenu', 'return false;')
-                .on('contextmenu', event => {
-                  annotator.draw('cancel').data('canceled', true)
-                  this.$emit('drawcancel')
-                })
-            },
-
-            onmove: event => annotator.draw('update', event),
-
-            onend: event => {
-              if (!annotator.data('canceled')) {
-                annotator.draw('stop', event).style('cursor', null).removeClass('foreground').toParent(this.annotation).off('contextmenu')
-                this.$forceUpdate()
-                this.$emit('drawfinish', annotator)
-              } else annotator.off('contextmenu').data('canceled', null)
-
-              for (const key in attr)
-                annotator.attr(key, attr[key] || null)
-            }
-          })
-
-      }
-      else {
-        this.background.style('cursor', 'default')
-        if (this.drawingable) this.drawingable.unset()
-      }
-    }
   },
 
   updated () {
     this.w = parseInt(this.width) || this.$refs.bg.scrollWidth
     this.h = parseInt(this.width) || this.$refs.bg.scrollHeight
-
-    if ((this.$refs.annotation.hasChildNodes() ? this.$refs.annotation.childNodes.length : 0) > this.interactables.length && this.drawing) {
-      // const fixDrawMode = (this.$refs.annotation.childNodes.length == 1) // BUG: only make all previous draw disappear at second draw
-      const element = this.$refs.annotation.childNodes[this.$refs.annotation.childNodes.length - 1]
-      const interaction = this.makeInteractable(element, this.drawing)
-      this.interactables.push(interaction)
-
-      /** @see https://github.com/vuejs/vue/issues/7347#issuecomment-354641887
-      @func this.$slots.annotation.push(toVNode(element)) 
-      */
-    }
   },
 
-  mounted () {
+  beforeMount () {
     if (this.$slots.default) {
       const media = this.$slots.default.filter(el => ['img', 'video', 'audio', 'picture'].includes(el.tag))
       const interval = setInterval(() => {
@@ -346,11 +81,14 @@ export default {
         if (loadComplete) clearInterval(interval)
       }, 43.48)
     } else this.$forceUpdate()
+  },
 
+  mounted () {
     this.background = SVG.adopt(this.$refs.bgSvg)
-    this.annotation = SVG.adopt(this.$refs.annotation)
+    this.annotations = SVG.adopt(this.$refs.annotations)
 
-    this.enableInteraction()
+    this.enableInteraction(!this.noInteract)
+    this.enableSelection(!this.noSelect)
     this.enableDrawing(this.drawing)
   }
 }

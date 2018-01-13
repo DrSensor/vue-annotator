@@ -17,8 +17,8 @@
   "scripts": {
     "dev": "poi --config .storybook/poi.config.js --storybook -o",
     "build:storybook": "poi build --config .storybook/poi.config.js --storybook",
-    "build:component": "surge .storybook/dist",
-    "deploy": "poi build src/components/Annotator.vue --component vue-annotator"
+    "build:component": "poi build src/components/Annotator.vue --component vue-annotator",
+    "deploy": "surge .storybook/dist"
   },
   "devDependencies": {
     "@storybook/addon-actions": "^3.3.0",
