@@ -37,7 +37,7 @@ jobs:
 
       - run:
           name: build storybook
-          command: yarn storybook:build
+          command: yarn build:storybook
       - persist_to_workspace:
           root: ~/repo
           paths:
@@ -58,7 +58,7 @@ jobs:
           at: ~/repo
       - run:
           name: build component
-          command: yarn build
+          command: yarn build:component
       - run:
           name: publish to npm
           command: npm publish
@@ -71,7 +71,7 @@ jobs:
       - <<: *env
       - run:
           name: deploy storybook to surge.sh
-          command: yarn deploy-storybook -- --domain ${CIRCLE_PROJECT_REPONAME}$CIRCLE_PR_NUMBER.surge.sh
+          command: yarn deploy -- --domain ${CIRCLE_PROJECT_REPONAME}$CIRCLE_PR_NUMBER.surge.sh
       - run: 
           name: teardown if PR is merged
           command: |

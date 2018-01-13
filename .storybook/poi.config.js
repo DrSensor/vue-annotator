@@ -1,3 +1,10 @@
+const path = require('path')
+const updateWebpackConfig = require('storybook-readme/env/vue/updateWebpackConfig')
+
+function resolve (dir) {
+  return path.join(__dirname, '..', dir)
+}
+
 module.exports = {
   /** BUG(vue-loader maybe): Can't use lazy load import when specify custom loader
   @config
@@ -16,16 +23,47 @@ module.exports = {
     '.storybook/addons.js'
   ],
 
+  babel: {
+    babelrc: false,
+    cacheDirectory: true,
+    plugins: [
+        [require.resolve('babel-plugin-transform-imports'), {
+            'components': {
+                transform: "components/${member}",
+                preventFullImport: true
+            },
+            'mixins': {
+                transform: "mixins/${member}",
+                preventFullImport: true
+            }
+        }]
+    ],
+    presets: [
+      [require.resolve('babel-preset-poi'), { jsx: 'vue' }]
+    ]
+  },
+
+  webpack (config) {
+    return updateWebpackConfig(config)
+  },
+
   extendWebpack (config) {
     config.module.rule('markdown')
       .test(/\.md$/)
-      .use('md')
-      .loader(require.resolve('raw-loader'))
+      .use('raw').loader(require.resolve('raw-loader')).end()
+      .use('markdown').loader(require.resolve('markdown-loader'))
   },
 
   dist: '.storybook/dist',
 
   presets: [
-    require('poi-preset-storybook')()
+    require('poi-preset-storybook')(),
+    require('poi-preset-resolve-alias')({
+      'components': resolve('src/components'),
+      'stories': resolve('src/stories'),
+      'utils': resolve('src/utils'),
+      'mixins': resolve('src/mixins'),
+      '~': resolve('')
+    })
   ]
 }

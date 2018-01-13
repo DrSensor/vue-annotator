@@ -22,14 +22,19 @@ import SVG from 'svg.js'
 import 'svg.select.js'
 import 'svg.draw.js'
 
-// import { cloneVNode } from './utils'
-// import { printSlotElement } from './debug'
+// import { printSlotElement } from 'utils/debug'
 
 export default {
   name: 'Annotator',
   props: {
-    width: Number,
-    height: Number,
+    width: {
+      type: [Number, String],
+      validator: (value) => !isNaN(value)
+    },
+    height: {
+      type: [Number, String],
+      validator: (value) => !isNaN(value)
+    },
     inertia: Boolean,
     grid: {
       type: [Array, Number],
@@ -53,8 +58,8 @@ export default {
 
   data () {
     return {
-      w: this.width,
-      h: this.height,
+      w: parseInt(this.width),
+      h: parseInt(this.height),
       interactables: [],
       drawingable: undefined,
       background: SVG.adopt(this.$refs.bgSvg),
@@ -70,10 +75,10 @@ export default {
       }) : null
     },
     minWidth: function () {
-      return typeof (this.minSize) === 'number' ? [this.minSize, this.minSize] : this.minSize[0]
+      return typeof (this.minSize) === 'number' ? this.minSize : this.minSize[0]
     },
     minHeight: function () {
-      return typeof (this.minSize) === 'number' ? [this.minSize, this.minSize] : this.minSize[1]
+      return typeof (this.minSize) === 'number' ? this.minSize : this.minSize[1]
     }
   },
 
@@ -126,6 +131,7 @@ export default {
     },
     */
     makeInteractable (node, fixDrawingMode = false) {
+      const master = SVG.adopt(this.$refs.svg)
       const annotator = SVG.adopt(node)
 
       const selectListener = event => {
@@ -316,8 +322,8 @@ export default {
   },
 
   updated () {
-    this.w = this.width || this.$refs.bg.scrollWidth
-    this.h = this.width || this.$refs.bg.scrollHeight
+    this.w = parseInt(this.width) || this.$refs.bg.scrollWidth
+    this.h = parseInt(this.width) || this.$refs.bg.scrollHeight
 
     if ((this.$refs.annotation.hasChildNodes() ? this.$refs.annotation.childNodes.length : 0) > this.interactables.length && this.drawing) {
       // const fixDrawMode = (this.$refs.annotation.childNodes.length == 1) // BUG: only make all previous draw disappear at second draw

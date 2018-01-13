@@ -1,32 +1,39 @@
 <template>
   <div id="annotation">
-    <annotations :minSize="minSize" :width="width" :height="height" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect">
+    <annotations width="600" height="600" :minSize="minSize" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect">
       <circle class="stroke" slot="annotation" cx="150" cy="150" r="100" />
+      <circle class="stroke" slot="annotation" cx="300" cy="300" r="100" />
     </annotations>
   </div>
 </template>
 
 <script>
 /** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
-@code import Annotator from '../../Annotator'
+@code import Annotator from 'components/Annotator'
 */
+import { number, boolean } from '@storybook/addon-knobs/dist/vue'
+
 export default {
-  props: [
-    'minSize',
-    'grid',
-    'width',
-    'height',
-    'inertia',
-    'multipleSelect'
-  ],
+  data () {
+    return {
+      minSize: number('minimum diameter', 50),
+      grid: [number('gird width', 0), number('gird height', 0)],
+      inertia: boolean('enable inertia', true),
+      multipleSelect: boolean('enable multiple select', false)
+    }
+  },
   components: {
-    annotations: () => import('../../Annotator')
+    annotations: () => import('components/Annotator')
   }
 }
 </script>
 
 <style scoped>
-annotation {
+svg {
+  background: whitesmoke;
+}
+
+#annotation {
   width: 100%;
   height: 100%;
 }

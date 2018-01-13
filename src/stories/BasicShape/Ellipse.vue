@@ -9,7 +9,7 @@
 
 <script>
 /** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
-@code import Annotator from '../../Annotator'
+@code import Annotator from 'components/Annotator'
 */
 export default {
   props: [
@@ -21,7 +21,7 @@ export default {
     'multipleSelect'
   ],
   components: {
-    annotations: () => import('../../Annotator')
+    annotations: () => import('components/Annotator')
   }
 }
 </script>

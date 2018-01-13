@@ -4,3 +4,5 @@ export const storyOrder = [
   'Interact and Manipulate',
   'AdvancedShape'
 ]
+
+export const scenarioOrder = undefined

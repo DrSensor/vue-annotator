@@ -16,7 +16,7 @@
 
 <script>
 /** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
-@code import Annotator from '../../Annotator'
+@code import Annotator from 'components/Annotator'
 */
 import SVG from 'svg.js'
 
@@ -34,7 +34,7 @@ export default {
     }
   },
   components: {
-    annotations: () => import('../../Annotator')
+    annotations: () => import('components/Annotator')
   },
 
   methods: {

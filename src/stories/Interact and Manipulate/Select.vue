@@ -12,7 +12,7 @@
 
 <script>
 /** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
-@code import Annotator from '../../Annotator'
+@code import Annotator from 'components/Annotator'
 */
 import SVG from 'svg.js'
 
@@ -26,7 +26,7 @@ export default {
     'multipleSelect'
   ],
   components: {
-    annotations: () => import('../../Annotator')
+    annotations: () => import('components/Annotator')
   },
   mounted () {
     console.log('<<< select shape to move another shape >>>'.toUpperCase())
