@@ -23,11 +23,11 @@ import 'svg.select.js'
 import 'svg.draw.js'
 
 // import { printSlotElement } from 'utils/debug'
-import { manipulate, drawing, select } from 'mixins'
+import { manipulate, drawing, select, delete as del } from 'mixins'
 
 export default {
   name: 'Annotator',
-  mixins: [manipulate, drawing, select],
+  mixins: [manipulate, drawing, select, del],
   props: {
     width: {
       type: [Number, String],

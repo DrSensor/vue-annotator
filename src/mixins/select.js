@@ -1,7 +1,6 @@
 import interact from 'interactjs'
 import SVG from 'svg.js'
 import 'svg.select.js'
-import 'svg.draw.js'
 
 export default {
   props: {
@@ -18,15 +17,8 @@ export default {
     makeSelectable (node) {
       const annotator = SVG.adopt(node)
 
-      const selectListener = event => {
-        const selector = annotator.selectize({
-          deepSelect: true,
-          rotationPoint: false,
-          points: true
-        }).data('selected', true)
-        this.$emit('select', selector)
+      const cleanupDot = selector => {
         const remove = classCSS => selector.remember('_selectHandler').nested.select(classCSS).members.forEach(member => member.remove())
-
         remove('.svg_select_boundingRect')
         if (['circle', 'ellipse'].includes(selector.type)) { // remove edges selector for 'circle' and 'ellipse'
           remove('.svg_select_points_lt')
@@ -34,32 +26,46 @@ export default {
           remove('.svg_select_points_rb')
           remove('.svg_select_points_lb')
         } else if (selector.type === 'path') selector.remember('_selectHandler').nested.remove()
-
-        if (!this.multipleSelect) {
-          this.$refs.annotations.childNodes.forEach(elm => {
-            if (!node.isSameNode(elm)) {
-              const shape = SVG.adopt(elm)
-              shape.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(shape.type) })
-
-              if (shape.data('selected')) {
-                shape.data('selected', null)
-                this.$emit('unselect', shape)
-              }
-            }
-          })
-        }
       }
 
-      const unselectListener = event => {
-        annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
+      const unselectOthers = () => {
+        this.$refs.annotations.childNodes.forEach(elm => {
+          if (!node.isSameNode(elm)) {
+            const shape = SVG.adopt(elm)
+            shape.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(shape.type) })
+            
+            if (shape.data('selected')) {
+              shape.data('selected', null)
+              this.$emit('unselect', shape)
+            }
+          }
+        })
+      }
+
+      const selectListener = event => {
+        const selector = annotator.selectize({
+          deepSelect: true,
+          rotationPoint: false,
+          points: true
+        }).data('selected', true)
+        this.$emit('select', selector)
+        cleanupDot(selector)
+        
+        if (!this.multipleSelect) {   // workaround for preserve dot, delete mixin workaround
+          unselectOthers()
+        }
+      }
+      const selection = interact(node).on('tap', selectListener)
+
+      selection.unselectListener = () => {
         if (annotator.data('selected')) {
+          annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
           annotator.data('selected', null)
           this.$emit('unselect', annotator)
         }
       }
 
-      const selection = interact(node).on('tap', selectListener)
-      this.background.on('click', unselectListener)
+      this.background.on('click', selection.unselectListener)
       return selection
     },
 

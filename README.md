@@ -36,6 +36,7 @@ Create annotation using SVG and HTML element.
 | `drawing` | switch to drawing mode | `Boolean` | optional | `false` |
 | `inertia` | enable inertia moment animation when interacting | `Boolean` | optional | `false` |
 | `multipleSelect` | enable multiple select | `Boolean` | optional | `false` |
+| `delete.sync` | delete selected element when set to `true` | `Boolean` | optional |
 
 
 ### Slots
@@ -55,6 +56,7 @@ Create annotation using SVG and HTML element.
 | `unselect` | emit when element is unselected (by clicking the background) | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
 | `drawfinish` | emit when drawing element is finish | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
 | `drawcancel` | emit when drawing element is canceled (via right click) |
+| `update:delete` | emit when shape was successfully deleted |
 
 > Tips: use `element.node.isSameNode(this.$refs.myAnnotation)` for identifying the element.
 

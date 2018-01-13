@@ -21,7 +21,6 @@ import { number, boolean } from '@storybook/addon-knobs/dist/vue'
 export default {
   data () {
     return {
-      drawing: true,
       minSize: number('minimum diameter', 50),
       grid: [number('gird width', 0), number('gird height', 0)],
       inertia: boolean('enable inertia', true),

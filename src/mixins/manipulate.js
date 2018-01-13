@@ -1,7 +1,5 @@
 import interact from 'interactjs'
 import SVG from 'svg.js'
-import 'svg.select.js'
-import 'svg.draw.js'
 
 export default {
   props: {
