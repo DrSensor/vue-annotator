@@ -8,54 +8,57 @@ import { storyOrder, scenarioOrder } from './config.js'
 
 import { action } from '@storybook/addon-actions'
 
-require.context('.', true, /\.vue$/).keys()
+const orderedFile = require.context('.', true, /\.vue$/).keys()
   .sort((a, b) => { // sort by storyOrder
     a = a.split('/').map(s => s.replace('.vue', ''))
     b = b.split('/').map(s => s.replace('.vue', ''))
 
-    if (storyOrder) var order = storyOrder.indexOf(a[1]) - storyOrder.indexOf(b[1])
+    if (isNaN(storyOrder)) var order = storyOrder.indexOf(a[1]) - storyOrder.indexOf(b[1])
     else order = a[1].charAt(0).toUpperCase() - b[1].charAt(0).toUpperCase() // sort alphabetically
 
-    if (order !== 0) {
-      if (scenarioOrder === undefined) { // sort alphabetically
+    if (order === 0) {
+      if (!isNaN(scenarioOrder[a[1]]) || !scenarioOrder[a[1]]) { // sort alphabetically
         a = a[a.length - 1].charAt(0).toUpperCase()
         b = b[b.length - 1].charAt(0).toUpperCase()
         order = a < b ? -1 : a > b ? 1 : 0
       } else {
-        order = scenarioOrder[a[1]].indexOf(a[2]) - scenarioOrder[b[1]].indexOf(b[2])
+        const aOrder = scenarioOrder[a[1]].indexOf(a[a.length - 1])
+        const bOrder = scenarioOrder[b[1]].indexOf(b[b.length - 1])
+        order = (aOrder < 0 ? scenarioOrder[a[1]].length : aOrder) - (bOrder < 0 ? scenarioOrder[b[1]].length : bOrder)
       }
     }
 
     return order
   })
-  .forEach((filename) => {
-    const hierarchy = filename.split('/')
-    const basename = hierarchy[hierarchy.length - 1]
-    if (/.vue$/.test(basename)) {
-      let componentName = hierarchy.length > 2 ? basename.replace('.vue', '') : 'Introduction'
-      let storyName = hierarchy.length > 2 ? hierarchy[hierarchy.length - 2] : basename.replace('.vue', '')
 
-      const Stories = storiesOf(storyName, module)
-      const Component = require(`${filename}`).default
+orderedFile.forEach((filename) => {
+  const hierarchy = filename.split('/')
+  const basename = hierarchy[hierarchy.length - 1]
+  if (/.vue$/.test(basename)) {
+    let componentName = hierarchy.length > 2 ? basename.replace('.vue', '') : 'Introduction'
+    let storyName = hierarchy.length > 2 ? hierarchy[hierarchy.length - 2] : basename.replace('.vue', '')
 
-      const story = () => {
-        let eventCounter = 0
-        return {
-          render () {
-            return <story onAction={action(`action ${++eventCounter}`)} />
-          },
-          components: {
-            'story': Component
-          }
+    const Stories = storiesOf(storyName, module)
+    const Component = require(`${filename}`).default
+
+    const story = () => {
+      let eventCounter = 0
+      return {
+        render () {
+          return <story onAction={action(`action ${++eventCounter}`)} />
+        },
+        components: {
+          'story': Component
         }
       }
-
-      /** CHAIN THE CUSTOM BLOCK WITH THE storybook-addon HERE */
-      let storyWithAddons = story
-      // storyWithAddons = withNotes(Component.__notes || '')(storyWithAddons)
-      // storyWithAddons = withDocs(Component.__docs || '', storyWithAddons) // WIP: https://github.com/tuchk4/storybook-readme/issues/37
-      Stories.add(componentName, storyWithAddons)
     }
-  })
+
+    /** CHAIN THE CUSTOM BLOCK WITH THE storybook-addon HERE */
+    let storyWithAddons = story
+    // storyWithAddons = withNotes(Component.__notes || '')(storyWithAddons)
+    // storyWithAddons = withDocs(Component.__docs || '', storyWithAddons) // WIP: https://github.com/tuchk4/storybook-readme/issues/37
+    Stories.add(componentName, storyWithAddons)
+  }
+})
 
 /* eslint-enable react/react-in-jsx-scope */

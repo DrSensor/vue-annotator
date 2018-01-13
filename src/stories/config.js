@@ -1,8 +1,15 @@
 export const storyOrder = [
-  'Welcome',
   'BasicShape',
   'Interact and Manipulate',
   'AdvancedShape'
 ]
 
-export const scenarioOrder = undefined
+export const scenarioOrder = {
+  'BasicShape': [
+    'Rectangle',
+    'Ellipse',
+    'Circle',
+    'Polygon'
+  ],
+  'Interact and Manipulate': ['Select']
+}
