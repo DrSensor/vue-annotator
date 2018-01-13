@@ -1,8 +1,8 @@
 <template>
   <div id="annotation">
-    <pre>Try to open Developer tools(Ctrl+Shft+I) > Console</pre>
+    <pre>Try to open <b>Action Logger</b> panel</pre>
     <pre>and also Vue-devtools > Events</pre>
-    <annotations :minSize="minSize" :width="width" :height="height" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect"
+    <annotations :minSize="minSize" width="600" height="600" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect"
                  @select="selected" @unselect="unselect">
       <polygon ref="myAnnotation" class="stroke" slot="annotation" points="200,10 250,190 160,210" />
       <rect class="stroke" slot="annotation" x="300" y="150" width="170" height="100" />
@@ -16,15 +16,18 @@
 */
 import SVG from 'svg.js'
 
+import { number, boolean } from '@storybook/addon-knobs/dist/vue'
+
 export default {
-  props: [
-    'minSize',
-    'grid',
-    'width',
-    'height',
-    'inertia',
-    'multipleSelect'
-  ],
+  data () {
+    return {
+      drawing: true,
+      minSize: number('minimum diameter', 50),
+      grid: [number('gird width', 0), number('gird height', 0)],
+      inertia: boolean('enable inertia', true),
+      multipleSelect: boolean('enable multiple select', false)
+    }
+  },
   components: {
     annotations: () => import('components/Annotator')
   },
@@ -39,18 +42,22 @@ export default {
       } else {
         SVG.adopt(this.$refs.myAnnotation).animate().dmove(-30)
       }
-      alert(`<${element.type}> is selected`)
+      this.$action('select', `<${element.type}>`)
     },
 
     unselect (element) {
-      alert(`<${element.type}> unselected`)
+      this.$action('unselect', `<${element.type}>`)
     }
   }
 }
 </script>
 
 <style scoped>
-annotation {
+svg {
+  background: whitesmoke;
+}
+
+#annotation {
   width: 100%;
   height: 100%;
 }

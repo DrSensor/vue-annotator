@@ -123,10 +123,10 @@ export default {
     }
   },
 
-  updated () {
+  beforeUpdate () {
     if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.interactables.length) {
       const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
-      const interaction = this.makeInteractable(element, this.drawing)
+      const interaction = this.makeInteractable(element, true)
       this.interactables.push(interaction)
     }
   },

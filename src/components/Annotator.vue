@@ -67,7 +67,7 @@ export default {
 
   },
 
-  updated () {
+  beforeUpdate () {
     this.w = parseInt(this.width) || this.$refs.bg.scrollWidth
     this.h = parseInt(this.width) || this.$refs.bg.scrollHeight
   },
@@ -76,9 +76,11 @@ export default {
     if (this.$slots.default) {
       const media = this.$slots.default.filter(el => ['img', 'video', 'audio', 'picture'].includes(el.tag))
       const interval = setInterval(() => {
-        let loadComplete = media.every(el => el.elm.complete)
-        this.$forceUpdate()
-        if (loadComplete) clearInterval(interval)
+        const loadComplete = media.every(el => el.elm.complete)
+        if (loadComplete) {
+          clearInterval(interval)
+          this.$forceUpdate()
+        }
       }, 43.48)
     } else this.$forceUpdate()
   },

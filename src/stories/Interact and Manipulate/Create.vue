@@ -48,7 +48,11 @@ export default {
 </script>
 
 <style scoped>
-annotation {
+svg {
+  background: whitesmoke;
+}
+
+#annotation {
   width: 100%;
   height: 100%;
 }
