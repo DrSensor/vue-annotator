@@ -10,6 +10,10 @@
     "SVG"
   ],
   "main": "dist/vue-annotator.js",
+  "files": [
+    "src/components/",
+    "src/mixins/"
+  ],
   "author": "Fahmi Akbar Wildana",
   "license": "MIT",
   "private": false,
@@ -17,7 +21,8 @@
   "scripts": {
     "dev": "poi --config .storybook/poi.config.js --storybook -o",
     "build:storybook": "poi build --config .storybook/poi.config.js --storybook",
-    "build:component": "poi build src/components/Annotator.vue --component vue-annotator",
+    "build:component": "poi build src/components/Annotator.vue --library",
+    "build:component:umd": "poi build src/components/Annotator.vue --library Annotator",
     "deploy": "surge .storybook/dist"
   },
   "devDependencies": {
