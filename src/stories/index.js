@@ -4,9 +4,9 @@ import { storiesOf } from '@storybook/vue'
 import { storyOrder, scenarioOrder } from './config.js'
 
 // import { withNotes } from '@storybook/addon-notes'
-// import { withDocs } from 'storybook-readme'
+import { withDocs } from 'storybook-readme'
 
-import { decorateAction } from '@storybook/addon-actions'
+import { action } from '@storybook/addon-actions'
 import Vue from 'vue'
 
 Vue.mixin({
@@ -52,11 +52,9 @@ orderedFile.forEach((filename) => {
 
     const story = () => {
       return {
+        // template: '<story @action="act" />',
+        // methods: { act: action(`${storyName}/${componentName}`) },
         render () {
-          const action = decorateAction([
-            args => [args[0], args[1]]
-          ])
-
           return <story onAction={action(`${storyName}/${componentName}`)} />
         },
         components: {
@@ -68,8 +66,12 @@ orderedFile.forEach((filename) => {
     /** CHAIN THE CUSTOM BLOCK WITH THE storybook-addon HERE */
     let storyWithAddons = story
     // storyWithAddons = withNotes(Component.__notes || '')(storyWithAddons)
-    // storyWithAddons = withDocs(Component.__docs || '', storyWithAddons) // WIP: https://github.com/tuchk4/storybook-readme/issues/37
-    Stories.add(componentName, storyWithAddons)
+
+    // console.log(Component.__docs)
+    // storyWithAddons = withDocs(Component.__docs || '<!-- STORY -->', storyWithAddons) // WIP: https://github.com/tuchk4/storybook-readme/issues/37
+    Stories
+      // .addDecorator(withDocs(''))
+      .add(componentName, storyWithAddons)
   }
 })
 

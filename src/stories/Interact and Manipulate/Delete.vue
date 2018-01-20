@@ -3,8 +3,7 @@
     <pre>Try to open <b>Action Logger</b> panel</pre>
     <pre>and also Vue-devtools > Events</pre>
     <button style="display: block" @click="deleting = true">delete</button>
-    <annotations style="display: block" :minSize="minSize" width="600" height="600" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect"
-                 :delete.sync="deleting">
+    <annotations style="display: block" :minSize="minSize" width="600" height="600" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect" :delete.sync="deleting">
       <polygon class="stroke" slot="annotation" points="200,10 250,190 160,210" />
       <rect class="stroke" slot="annotation" x="300" y="150" width="170" height="100" />
     </annotations>
@@ -12,10 +11,7 @@
 </template>
 
 <script>
-/** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
-@code import Annotator from 'components/Annotator'
-*/
-import SVG from 'svg.js'
+import Annotator from 'components/Annotator'
 
 import { number, boolean } from '@storybook/addon-knobs/dist/vue'
 
@@ -26,13 +22,11 @@ export default {
       minSize: number('minimum diameter', 50),
       grid: [number('gird width', 0), number('gird height', 0)],
       inertia: boolean('enable inertia', true),
-      multipleSelect: boolean('enable multiple select', false),
-      node: null
+      multipleSelect: boolean('enable multiple select', false)
     }
   },
-  
   components: {
-    annotations: () => import('components/Annotator')
+    annotations: Annotator
   }
 }
 </script>

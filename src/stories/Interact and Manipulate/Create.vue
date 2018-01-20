@@ -15,9 +15,7 @@
 </template>
 
 <script>
-/** BUG(storybook-to-ghpages): must use lazy load import. Don't know why
-@code import Annotator from 'components/Annotator'
-*/
+import Annotator from 'components/Annotator'
 import SVG from 'svg.js'
 
 import { number, boolean } from '@storybook/addon-knobs/dist/vue'
@@ -33,7 +31,7 @@ export default {
     }
   },
   components: {
-    annotations: () => import('components/Annotator')
+    annotations: Annotator
   },
 
   methods: {

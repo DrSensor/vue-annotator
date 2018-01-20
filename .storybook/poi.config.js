@@ -7,15 +7,14 @@ function resolve (dir) {
 
 module.exports = {
   /** BUG(vue-loader maybe): Can't use lazy load import when specify custom loader
-  @config
+  @config */
   vue: {
     loaders: {
-      docs: require.resolve('../.loader/docs-loader.js'),
-      notes: require.resolve('../.loader/notes-loader.js'),
-      info: require.resolve('../.loader/info-loader.js')
+      docs: [require.resolve('../.loader/docs-loader.js'), 'html-loader', 'markdown-loader']
+      // notes: require.resolve('../.loader/notes-loader.js'),
+      // info: require.resolve('../.loader/info-loader.js')
     }
   },
-  */
 
   // Entry is relative to process.cwd()
   entry: [
@@ -27,32 +26,30 @@ module.exports = {
     babelrc: false,
     cacheDirectory: true,
     plugins: [
-        [require.resolve('babel-plugin-transform-imports'), {
-            'components': {
-                transform: "components/${member}",
-                preventFullImport: true
-            },
-            'mixins': {
-                transform: "mixins/${member}",
-                preventFullImport: true
-            }
-        }]
+      [require.resolve('babel-plugin-transform-imports'), {
+        'components': {
+          transform: "components/${member}",
+          preventFullImport: true
+        },
+        'mixins': {
+          transform: "mixins/${member}",
+          preventFullImport: true
+        }
+      }]
     ],
     presets: [
       [require.resolve('babel-preset-poi'), { jsx: 'vue' }]
     ]
   },
 
-  webpack (config) {
-    return updateWebpackConfig(config)
-  },
+  // webpack (config) {
+  //   console.log(JSON.stringify(config))
+  //   // return updateWebpackConfig(config)
+  // },
 
-  extendWebpack (config) {
-    config.module.rule('markdown')
-      .test(/\.md$/)
-      .use('raw').loader(require.resolve('raw-loader')).end()
-      .use('markdown').loader(require.resolve('markdown-loader'))
-  },
+  // extendWebpack (config) {
+  //   config.merge(updateWebpackConfig(config.toConfig()))
+  // },
 
   dist: '.storybook/dist',
 
