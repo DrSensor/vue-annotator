@@ -57,8 +57,11 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: build component
+          name: build component as CJS module
           command: yarn build:component
+      - run:
+          name: build component as UMD module
+          command: yarn build:component:umd
       - run:
           name: publish to npm
           command: npm publish
