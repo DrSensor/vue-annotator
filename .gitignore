@@ -3,3 +3,4 @@ umd/
 *.lock
 out*
 .out*
+test.json
