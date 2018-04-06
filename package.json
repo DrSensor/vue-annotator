@@ -38,7 +38,7 @@
     "@storybook/addon-knobs": "^3.3.0",
     "@storybook/addon-notes": "^3.3.0",
     "@storybook/addon-options": "^3.3.0",
-    "@storybook/vue": "^3.3.0",
+    "@storybook/vue": "3.3.0",
     "storybook-readme": "^3.2.0",
     "babel-plugin-transform-imports": "^1.4.1",
     "marked": "^0.3.9",
