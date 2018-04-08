@@ -5,8 +5,9 @@
 Create annotation using SVG and HTML element.
 
 ## Usage
+
 ```html
-<annotator inertia
+<v-annotator inertia
   :drawing="enableDrawingMode"
   @select="openDialog"
   :minSize="[50, 50]"
@@ -21,8 +22,44 @@ Create annotation using SVG and HTML element.
 
     <rect slot="drawing" stroke="red" />
 
-</annotator>
+</v-annotator>
 ```
+
+```css
+<style scoped>
+@import '~vue-annotator/style.css';
+
+/* Your beloved style */
+</style>
+```
+
+<details>
+<summary>Enable <code>--skipLibCheck</code> if using typescript</summary>
+
+In *tsconfig.json*
+
+```js
+{
+  compilerOptions: {
+    skipLibCheck: true
+  }
+}
+```
+
+Now it should work fine
+
+```ts
+import { Vue, Component } from 'vue-property-decorator'
+import VAnnotator from 'vue-annotator'
+
+@Component({ components: { VAnnotator } })
+export class MyCanvas extends Vue {
+  /** Your beloved logic */
+}
+```
+
+</details>
+
 
 ### Props
 > \* : must be set if no background

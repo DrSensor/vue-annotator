@@ -64,7 +64,9 @@ jobs:
           command: yarn build:component:umd
       - run:
           name: publish to npm
-          command: npm publish
+          command: |
+            cp dist/index.css style.css
+            npm publish
 
   deploy:
     <<: *defaults
