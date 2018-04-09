@@ -36,6 +36,8 @@ Create annotation using SVG and HTML element.
 <details>
 <summary>Enable <code>--skipLibCheck</code> if using typescript</summary>
 
+> Due to https://github.com/taye/interact.js/issues/623
+
 In *tsconfig.json*
 
 ```js
