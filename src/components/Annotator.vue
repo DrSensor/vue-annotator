@@ -71,7 +71,7 @@ export default {
 
   },
 
-  beforeUpdate () {
+  updated () {
     this.w = parseInt(this.width) || this.$refs.bg.scrollWidth
     this.h = parseInt(this.width) || this.$refs.bg.scrollHeight
   },

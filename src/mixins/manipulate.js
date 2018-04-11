@@ -73,9 +73,9 @@ export default {
                 target.size(event.rect.width, event.rect.height)
                 break
               case 'circle':
-                const antiPhytagoras = (x, y) => x != 0 && y != 0 && Math.sign(x) != Math.sign(y) ? 0 : Math.sign(x + y) * Math.hypot(event.deltaRect.width, event.deltaRect.height)
+                const antiPhytagoras = (x, y) => x !== 0 && y !== 0 && Math.sign(x) !== Math.sign(y) ? 0 : Math.sign(x + y) * Math.hypot(event.deltaRect.width, event.deltaRect.height)
                 const delta = antiPhytagoras(event.deltaRect.width, event.deltaRect.height)
-                const d = s => delta != 0 ? (s / 2) : 0
+                const d = s => delta !== 0 ? (s / 2) : 0
                 const threshold = (this.minWidth + this.minHeight) / 2 // because deltaRect will keep going when resizing in diagonal
 
                 // BUG: still have slight move when resizing diagonally
@@ -121,7 +121,7 @@ export default {
     }
   },
 
-  beforeUpdate () {
+  updated () {
     if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.interactables.length) {
       const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
       const interaction = this.makeInteractable(element, true)

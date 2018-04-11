@@ -33,7 +33,7 @@ export default {
           if (!node.isSameNode(elm)) {
             const shape = SVG.adopt(elm)
             shape.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(shape.type) })
-            
+
             if (shape.data('selected')) {
               shape.data('selected', null)
               this.$emit('unselect', shape)
@@ -50,7 +50,7 @@ export default {
         }).data('selected', true)
         this.$emit('select', selector)
         cleanupDot(selector)
-        
+
         if (!this.multipleSelect) {   // workaround for preserve dot, delete mixin workaround
           unselectOthers()
         }
@@ -82,7 +82,7 @@ export default {
     }
   },
 
-  beforeUpdate () {
+  updated () {
     if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.selectables.length) {
       const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
       const selection = this.makeSelectable(element)
