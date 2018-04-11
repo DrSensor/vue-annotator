@@ -73,7 +73,7 @@ export default {
 
   updated () {
     this.w = parseInt(this.width) || this.$refs.bg.scrollWidth
-    this.h = parseInt(this.width) || this.$refs.bg.scrollHeight
+    this.h = parseInt(this.height) || this.$refs.bg.scrollHeight
   },
 
   beforeMount () {
@@ -81,7 +81,7 @@ export default {
       const media = this.$slots.default.filter(el => ['img', 'video', 'audio', 'picture'].includes(el.tag))
       const interval = setInterval(() => {
         const loadComplete = media.every(el => el.elm.complete)
-        if (loadComplete) {
+        if (loadComplete && this.$refs.annotations) {
           clearInterval(interval)
           this.$forceUpdate()
         }
@@ -92,7 +92,6 @@ export default {
   mounted () {
     this.background = SVG.adopt(this.$refs.bgSvg)
     this.annotations = SVG.adopt(this.$refs.annotations)
-
     this.enableInteraction(!this.noInteract)
     this.enableSelection(!this.noSelect)
     this.enableDrawing(this.drawing)

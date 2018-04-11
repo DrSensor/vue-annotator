@@ -118,15 +118,23 @@ export default {
           } else this.interactables[id] = this.makeInteractable(node)
         })
       }
+    },
+
+    $_onUpdate (isDrawing) {
+      if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.interactables.length) {
+        const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
+        const interaction = this.makeInteractable(element, isDrawing)
+        this.interactables.push(interaction)
+      }
     }
   },
 
+  mounted () {
+    this.$on('drawfinish', () => this.$_onUpdate(false))
+  },
+
   updated () {
-    if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.interactables.length) {
-      const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
-      const interaction = this.makeInteractable(element, true)
-      this.interactables.push(interaction)
-    }
+    this.$_onUpdate(this.drawing)
   },
 
   computed: {

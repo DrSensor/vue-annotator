@@ -2,10 +2,14 @@
   <div id="annotation">
     <pre>Try to open <b>Action Logger</b> panel</pre>
     <pre>and also Vue-devtools > Events</pre>
+    <button @click="onAdd">Add rectangle</button>
     <annotations :minSize="minSize" width="600" height="600" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect"
                  @select="selected" @unselect="unselect">
+      <img draggable="false" src="https://cdn.css-tricks.com/wp-content/uploads/2017/01/vue-2-1.jpg" />
       <polygon ref="myAnnotation" class="stroke" slot="annotation" points="200,10 250,190 160,210" />
-      <rect class="stroke" slot="annotation" x="300" y="150" width="170" height="100" />
+      <template slot="annotation" v-for="(offset, key) in offsetList">
+        <rect class="stroke" :x="300+offset" :y="150+offset" width="170" height="100" :key="key" />
+      </template>
     </annotations>
   </div>
 </template>
@@ -22,7 +26,8 @@ export default {
       minSize: number('minimum diameter', 50),
       grid: [number('gird width', 0), number('gird height', 0)],
       inertia: boolean('enable inertia', true),
-      multipleSelect: boolean('enable multiple select', false)
+      multipleSelect: boolean('enable multiple select', false),
+      offsetList: [10,20,30]
     }
   },
   components: {
@@ -44,6 +49,11 @@ export default {
 
     unselect (element) {
       this.$action('unselect', `<${element.type}>`)
+    },
+
+    onAdd () {
+      const lastOffset = this.offsetList[this.offsetList.length - 1]
+      this.offsetList.push(lastOffset+10)
     }
   }
 }
