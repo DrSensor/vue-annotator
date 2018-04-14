@@ -16,12 +16,6 @@ export default {
     multipleSelect: Boolean
   },
 
-  data () {
-    return {
-      interactables: []     // waste of memory?
-    }
-  },
-
   methods: {
     /** @func fixDrawingMode is hard fix, need to think another solution */
     makeInteractable (node, fixDrawingMode = false) {
@@ -39,8 +33,10 @@ export default {
           },
           autoScroll: true,
 
+          onend: event => this.$emit('move-end', SVG.adopt(event.target)),
+
           // call this function on every dragmove event
-          onmove: event => SVG.adopt(event.target).dmove(event.dx, event.dy)
+          onmove: event => this.$emit('move', SVG.adopt(event.target).dmove(event.dx, event.dy))
         })
 
         .resizable({
@@ -61,7 +57,9 @@ export default {
             min: { width: this.minWidth, height: this.minHeight }
           },
 
-          // call this function on every resizemove event
+          onend: event => this.$emit('resize-end', SVG.adopt(event.target)),
+
+          // called on every resizemove event
           onmove: (event) => {
             const target = SVG.adopt(event.target)
 
@@ -104,6 +102,8 @@ export default {
                 target.size(event.rect.width, event.rect.height)
                 break
             }
+
+            this.$emit('resize', target)
           }
         })
 
@@ -113,28 +113,20 @@ export default {
     enableInteraction (enabled = true) {
       if (this.$refs.annotations.hasChildNodes()) {
         this.$refs.annotations.childNodes.forEach((node, id) => {
-          if (!enabled && this.interactables.length) {
-            this.interactables.forEach(interaction => interaction.draggable(false).resizable(false))
-          } else this.interactables[id] = this.makeInteractable(node)
+          if (!enabled) {
+            interact(node).draggable(false).resizable(false)
+          } else this.makeInteractable(node)
         })
-      }
-    },
-
-    $_onUpdate (isDrawing) {
-      if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.interactables.length) {
-        const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
-        const interaction = this.makeInteractable(element, isDrawing)
-        this.interactables.push(interaction)
       }
     }
   },
 
   mounted () {
-    this.$on('drawfinish', () => this.$_onUpdate(false))
+    this.$on('draw-end', annotator => this.makeInteractable(annotator.node, false))
   },
 
-  updated () {
-    this.$_onUpdate(this.drawing)
+  beforeDestroy () {
+    this.$off('draw-end')
   },
 
   computed: {

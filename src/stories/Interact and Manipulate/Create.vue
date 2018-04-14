@@ -2,7 +2,7 @@
   <div id="annotation">
     <button @click="drawing = !drawing">{{drawing ? "stop" : "drawing" }}</button>
     <annotations :drawing="drawing" :inertia="inertia" :minSize="minSize" :grid="grid" :multipleSelect="multipleSelect"
-                @drawfinish="drawfinish" @drawcancel="drawcancel">
+                @draw-end="drawfinish" @draw-cancel="drawcancel" @draw="onDraw">
       <img draggable="false" src="https://cdn.css-tricks.com/wp-content/uploads/2017/01/vue-2-1.jpg" />
       <!-- <polygon class="stroke" slot="drawing" /> not supported yet -->
       <rect class="stroke" slot="drawing" />
@@ -40,6 +40,9 @@ export default {
     },
     drawcancel () {
       this.$action('cancel drawing')
+    },
+    onDraw (element) {
+      console.log(element.node)
     }
   }
 }
