@@ -7,12 +7,6 @@ export default {
     multipleSelect: Boolean
   },
 
-  data () {
-    return {
-      selectables: []     // waste of memory?
-    }
-  },
-
   methods: {
     makeSelectable (node) {
       const annotator = SVG.adopt(node)
@@ -57,36 +51,35 @@ export default {
       }
       const selection = interact(node).on('tap', selectListener)
 
-      selection.unselectListener = () => {
-        if (annotator.data('selected')) {
-          annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
-          annotator.data('selected', null)
-          this.$emit('unselect', annotator)
-        }
-      }
-
-      this.background.on('click', selection.unselectListener)
       return selection
     },
 
     enableSelection (enabled = true) {
       if (this.$refs.annotations.hasChildNodes()) {
         this.$refs.annotations.childNodes.forEach((node, id) => {
-          if (!enabled && this.selectables.length) {
-            this.selectables.forEach(selection => selection.off('tap'))
+          if (!enabled) {
+            interact(node).selection.off('tap')
             this.background.fire('click') // unselect all
             this.background.off('click')
-          } else this.selectables[id] = this.makeSelectable(node)
+          } else {
+            this.makeSelectable(node)
+            this.background.on('click', this.unselectAll)
+          }
         })
       }
-    }
-  },
+    },
 
-  updated () {
-    if ((this.$refs.annotations.hasChildNodes() ? this.$refs.annotations.childNodes.length : 0) > this.selectables.length) {
-      const element = this.$refs.annotations.childNodes[this.$refs.annotations.childNodes.length - 1]
-      const selection = this.makeSelectable(element)
-      this.selectables.push(selection)
+    unselectAll () {
+      if (this.$refs.annotations.hasChildNodes()) {
+        this.$refs.annotations.childNodes.forEach((node, id) => {
+          const annotator = SVG.adopt(node)
+          if (annotator.data('selected')) {
+            annotator.selectize(false, { deepSelect: ['g', 'foreignObject', 'polygon'].includes(annotator.type) })
+            annotator.data('selected', null)
+            this.$emit('unselect', annotator)
+          }
+        })
+      }
     }
   }
 }

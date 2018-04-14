@@ -62,6 +62,7 @@ export class MyCanvas extends Vue {
 
 </details>
 
+For complete example see [`src/stories/*/*.vue`](./src/stories)
 
 ### Props
 > \* : must be set if no background
@@ -70,7 +71,7 @@ export class MyCanvas extends Vue {
 |---------- |-------- |---------- |---------- |---------- |
 | `width` | width of drawing canvas | `Number` | *optional | width of background |
 | `height` | width of drawing canvas | `Number` | *optional | height of background |
-| `grid` | set grid for sanpping. `:grid="[w,h]"` for setting width and height. `:grid="w"` for setting grid in square | `Array[2]` or `Number` | optional | `null` |
+| `grid` | set grid for snapping. `:grid="[w,h]"` for setting width and height. `:grid="w"` for setting grid in square | `Array[2]` or `Number` | optional | `null` |
 | `minSize` | set minimum size of annotation. `:minSize="[w,h]"` for set minimum width and height of annotation size. `:grid="w"` for set minimum width and height of annotation size equal to `w` | `Array[2]` or `Number` | optional | `false` |
 | `drawing` | switch to drawing mode | `Boolean` | optional | `false` |
 | `inertia` | enable inertia moment animation when interacting | `Boolean` | optional | `false` |
@@ -92,14 +93,19 @@ export class MyCanvas extends Vue {
 |---------- |-------- |---------- |
 | `select` | emit when element is click/select | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
 | `unselect` | emit when element is unselected (by clicking the background) | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
-| `drawfinish` | emit when drawing element is finish | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
-| `drawcancel` | emit when drawing element is canceled (via right click) |
+| `move` | emit when element is moved | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `move-end` | emit __after__ the element is moved | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `resize` | emit when element is resized | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `resize-end` | emit __after__ the element is resized | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `draw` | emit when drawing an element | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `draw-end` | emit when drawing element is finish | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `draw-cancel` | emit when drawing element is canceled (via right click) |
 | `update:delete` | emit when shape was successfully deleted |
 
 > Tips: use `element.node.isSameNode(this.$refs.myAnnotation)` for identifying the element.
 
 ### Style CSS
-> Vue-Annotator use `svg.select.js` with this predefined style that can be override
+> Vue-Annotator use `svg.select.js`
 
 | Class name | Description | Notes
 |---------- |-------- |--------- |

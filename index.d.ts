@@ -32,12 +32,6 @@ export default class VAnnotator extends Vue {
     background: SVGForeignObjectElement
     annotations: SVGGElement
 
-    /** @see select.js */
-    selectables: Interactable
-
-    /** @see manipulate.js */
-    interactables: InteractStatic[]
-
     /** @see drawing.js */
     drawingable?: Interactable
   }
