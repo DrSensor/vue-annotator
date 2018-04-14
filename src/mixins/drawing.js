@@ -37,17 +37,17 @@ export default {
                 .attr('oncontextmenu', 'return false;')
                 .on('contextmenu', event => {
                   annotator.draw('cancel').data('canceled', true)
-                  this.$emit('drawcancel')
+                  this.$emit('draw-cancel')
                 })
             },
 
-            onmove: event => annotator.draw('update', event),
+            onmove: event => this.$emit('draw', annotator.draw('update', event)),
 
             onend: event => {
               if (!annotator.data('canceled')) {
                 annotator.draw('stop', event).style('cursor', null).removeClass('foreground').toParent(this.annotations).off('contextmenu')
                 this.$forceUpdate()
-                this.$emit('drawfinish', annotator)
+                this.$emit('draw-end', annotator)
               } else annotator.off('contextmenu').data('canceled', null)
 
               for (const key in attr) {

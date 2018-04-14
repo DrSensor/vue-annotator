@@ -89,12 +89,30 @@ export default {
     } else this.$forceUpdate()
   },
 
+  created () {
+    this.observer = new MutationObserver(mutations => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'childList') {
+          for (const node of mutation.addedNodes) {
+            this.makeInteractable(node, this.drawing)
+            this.makeSelectable(node)
+          }
+          for (const node of mutation.removedNodes)
+            interact(node).unset()
+        }
+      }
+    })
+  },
+
   mounted () {
-    this.background = SVG.adopt(this.$refs.bgSvg)
-    this.annotations = SVG.adopt(this.$refs.annotations)
-    this.enableInteraction(!this.noInteract)
-    this.enableSelection(!this.noSelect)
-    this.enableDrawing(this.drawing)
+    this.$nextTick(() => {
+      this.background = SVG.adopt(this.$refs.bgSvg)
+      this.annotations = SVG.adopt(this.$refs.annotations)
+      this.enableSelection(!this.noSelect)
+      this.enableInteraction(!this.noInteract)
+      this.enableDrawing(this.drawing)
+      this.observer.observe(this.annotations.node, { childList: true })
+    })
   }
 }
 </script>
