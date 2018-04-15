@@ -4,9 +4,9 @@
     <pre>and also Vue-devtools > Events</pre>
     <button @click="onAdd">Add rectangle</button>
     <annotations :minSize="minSize" width="600" height="600" :grid="grid" :inertia="inertia" :multipleSelect="multipleSelect"
-                 @select="selected" @unselect="unselect">
+                 @select="selected" @unselect="unselect" mouse-select="left">
       <img draggable="false" src="https://cdn.css-tricks.com/wp-content/uploads/2017/01/vue-2-1.jpg" />
-      <polygon ref="myAnnotation" class="stroke" slot="annotation" points="200,10 250,190 160,210" />
+      <polygon @click.right.prevent ref="myAnnotation" class="stroke" slot="annotation" points="200,10 250,190 160,210" />
       <template slot="annotation" v-for="(offset, key) in offsetList">
         <rect class="stroke" :x="300+offset" :y="150+offset" width="170" height="100" :key="key" />
       </template>

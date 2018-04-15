@@ -75,10 +75,11 @@ export class MyCanvas extends Vue {
 | `width` | width of drawing canvas | `Number` | *optional | width of background |
 | `height` | width of drawing canvas | `Number` | *optional | height of background |
 | `grid` | set grid for snapping. `:grid="[w,h]"` for setting width and height. `:grid="w"` for setting grid in square | `Array[2]` or `Number` | optional | `null` |
-| `minSize` | set minimum size of annotation. `:minSize="[w,h]"` for set minimum width and height of annotation size. `:grid="w"` for set minimum width and height of annotation size equal to `w` | `Array[2]` or `Number` | optional | `false` |
+| `min-size` | set minimum size of annotation. `:minSize="[w,h]"` for set minimum width and height of annotation size. `:grid="w"` for set minimum width and height of annotation size equal to `w` | `Array[2]` or `Number` | optional | `false` |
 | `drawing` | switch to drawing mode | `Boolean` | optional | `false` |
 | `inertia` | enable inertia moment animation when interacting | `Boolean` | optional | `false` |
-| `multipleSelect` | enable multiple select | `Boolean` | optional | `false` |
+| `multiple-select` | enable multiple select | `Boolean` | optional | `false` |
+| `mouse-select` | restrict select only for specific mouse button | `String` of `left`\|`right`\|`middle` | optional |
 | `delete.sync` | delete selected element when set to `true` | `Boolean` | optional |
 
 
@@ -89,12 +90,15 @@ export class MyCanvas extends Vue {
 |---------- |-------- |---------- |
 | `default` | background element of annotation | Any HTML element |
 | `annotation` | annotation element (accept SVG element) | `<rect>`, `<ellipse>`, `<circle>`, `<polygon>`, `<path>`, `<foreignObject>` |
-| `drawing` | *draw element via mouse click&drag | `<rect>`, `<ellipse>`, `<circle>` | 
+| `drawing` | *draw element via mouse click&drag | `<rect>`, `<ellipse>`, `<circle>` |
 
 ### Events
 | Event name | Description | Parameters |
 |---------- |-------- |---------- |
 | `select` | emit when element is click/select | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `select-left` | emit when element is clicked with **left** mouse button | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `select-middle` | emit when element is clicked with **middle** mouse button | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
+| `select-right` | emit when element is clicked with **right** mouse button | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
 | `unselect` | emit when element is unselected (by clicking the background) | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
 | `move` | emit when element is moved | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |
 | `move-end` | emit __after__ the element is moved | element: [`SVG.Element`](http://svgjs.com/elements/#elements) |

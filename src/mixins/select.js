@@ -2,9 +2,20 @@ import interact from 'interactjs'
 import SVG from 'svg.js'
 import 'svg.select.js'
 
+function btncode2string (code) {
+  if (code === 0) return 'left'
+  else if (code === 1) return 'middle'
+  else if (code === 2) return 'right'
+  return ''
+}
+
 export default {
   props: {
-    multipleSelect: Boolean
+    multipleSelect: Boolean,
+    mouseSelect: {
+      default: '',
+      type: String
+    }
   },
 
   methods: {
@@ -37,16 +48,19 @@ export default {
       }
 
       const selectListener = event => {
-        const selector = annotator.selectize({
-          deepSelect: true,
-          rotationPoint: false,
-          points: true
-        }).data('selected', true)
-        this.$emit('select', selector)
-        cleanupDot(selector)
+        if (this.mouseSelect === btncode2string(event.button)) {
+          const selector = annotator.selectize({
+            deepSelect: true,
+            rotationPoint: false,
+            points: true
+          }).data('selected', true)
+          this.$emit('select', selector)
+          if (btncode2string(event.button) !== '') this.$emit(`select-${btncode2string(event.button)}`, selector)
+          cleanupDot(selector)
 
-        if (!this.multipleSelect) {   // workaround for preserve dot, delete mixin workaround
-          unselectOthers()
+          if (!this.multipleSelect) {   // workaround for preserve dot, delete mixin workaround
+            unselectOthers()
+          }
         }
       }
       const selection = interact(node).on('tap', selectListener)
