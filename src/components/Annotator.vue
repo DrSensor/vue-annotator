@@ -51,10 +51,10 @@ export default {
       this.enableDrawing(value)
     },
     noInteract: function (value) {
-      this.enableInteraction(value)
+      this.enableInteraction(!value)
     },
     noSelect: function (value) {
-      this.enableSelection(value)
+      this.enableSelection(!value)
     },
   },
 
@@ -105,9 +105,9 @@ export default {
   },
 
   mounted () {
+    this.background = SVG.adopt(this.$refs.bgSvg)
+    this.annotations = SVG.adopt(this.$refs.annotations)
     this.$nextTick(() => {
-      this.background = SVG.adopt(this.$refs.bgSvg)
-      this.annotations = SVG.adopt(this.$refs.annotations)
       this.enableSelection(!this.noSelect)
       this.enableInteraction(!this.noInteract)
       this.enableDrawing(this.drawing)

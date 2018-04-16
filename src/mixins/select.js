@@ -6,14 +6,14 @@ function btncode2string (code) {
   if (code === 0) return 'left'
   else if (code === 1) return 'middle'
   else if (code === 2) return 'right'
-  return ''
+  return null
 }
 
 export default {
   props: {
     multipleSelect: Boolean,
     mouseSelect: {
-      default: '',
+      default: null,
       type: String
     }
   },
@@ -48,7 +48,7 @@ export default {
       }
 
       const selectListener = event => {
-        if (this.mouseSelect === btncode2string(event.button)) {
+        if (!this.mouseSelect || this.mouseSelect === btncode2string(event.button) || !btncode2string(event.button)) {
           const selector = annotator.selectize({
             deepSelect: true,
             rotationPoint: false,
@@ -72,7 +72,7 @@ export default {
       if (this.$refs.annotations.hasChildNodes()) {
         this.$refs.annotations.childNodes.forEach((node, id) => {
           if (!enabled) {
-            interact(node).selection.off('tap')
+            interact(node).off('tap')
             this.background.fire('click') // unselect all
             this.background.off('click')
           } else {
